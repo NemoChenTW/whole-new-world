@@ -5,17 +5,22 @@ android {
     buildToolsVersion "29.0.0"
     defaultConfig {
         applicationId "com.taipei.ttbootcamp"
-        minSdkVersion 23
+        minSdkVersion 16
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -26,4 +31,26 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    api 'com.android.support:multidex:1.0.1'
+
+    //library required to display map
+    implementation 'com.tomtom.online:sdk-maps:2.4101'
+    //library required for search
+    implementation("com.tomtom.online:sdk-search:2.4101")
+    //library required for routing
+    implementation("com.tomtom.online:sdk-routing:2.4101")
+    //library required for traffic
+    implementation("com.tomtom.online:sdk-traffic:2.4101")
+    //library required for geofencing
+    implementation("com.tomtom.online:sdk-geofencing:2.4101")
+    //extencion library for map custom style and ui support
+    implementation("com.tomtom.online:sdk-maps-ui-extensions:2.4101")
+    //extencion library for rx-java2
+    implementation("com.tomtom.online:sdk-maps-rx-extensions:2.4101")
+    //extencion library for kotlin support
+    implementation("com.tomtom.online:sdk-maps-ktx-extensions:2.4101")
+    //extencion library for displaying static map
+    implementation("com.tomtom.online:sdk-maps-static-image:2.4101")
+    //extencion library for driving features
+    implementation("com.tomtom.online:sdk-maps-driving-extensions:2.4101")
 }
