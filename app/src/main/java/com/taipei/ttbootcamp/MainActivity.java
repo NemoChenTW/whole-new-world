@@ -1,14 +1,18 @@
 package com.taipei.ttbootcamp;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.tomtom.online.sdk.map.MapFragment;
 import com.tomtom.online.sdk.map.OnMapReadyCallback;
 import com.tomtom.online.sdk.map.TomtomMap;
+import com.tomtom.online.sdk.map.TomtomMapCallback;
 
 public class MainActivity extends AppCompatActivity {
+    static final String TAG = "MainActivity";
 
     private TomtomMap tomtomMap;
 
@@ -35,6 +39,34 @@ public class MainActivity extends AppCompatActivity {
                     tomtomMap = map;
                     tomtomMap.setMyLocationEnabled(true);
 //                    tomtomMap.collectLogsToFile(SampleApp.LOGCAT_PATH);
+                    tomtomMap.addOnMapClickListener(onMapClickListener);
+                    tomtomMap.addOnMapLongClickListener(onMapLongClickListener);
+                    tomtomMap.addOnMapViewPortChangedListener(onMapViewPortChangedListener);
                 }
             };
+
+    private TomtomMapCallback.OnMapClickListener onMapClickListener =
+            latLng -> displayMessage(
+                    R.string.menu_events_on_map_click,
+                    latLng.getLatitude(),
+                    latLng.getLongitude()
+            );
+    private TomtomMapCallback.OnMapLongClickListener onMapLongClickListener =
+            latLng -> displayMessage(
+                    R.string.menu_events_on_map_long_click,
+                    latLng.getLatitude(),
+                    latLng.getLongitude()
+            );
+    private TomtomMapCallback.OnMapViewPortChanged onMapViewPortChangedListener =
+            (focalLatitude, focalLongitude, zoomLevel, perspectiveRatio, yawDegrees) -> displayMessage(
+                    R.string.menu_events_on_map_panning,
+                    focalLatitude,
+                    focalLongitude
+            );
+    private void displayMessage(@StringRes int titleId, double lat, double lon) {
+        String title = this.getString(titleId);
+        String message = String.format(java.util.Locale.getDefault(),
+                "%s : %f : %f", title, lat, lon);
+        Log.d(TAG, "displayMessage: " + message);
+    }
 }

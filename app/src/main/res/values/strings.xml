@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">TTBootCamp</string>
+    <string name="menu_events_on_map_click">Single Press</string>
+    <string name="menu_events_on_map_long_click">Long Press</string>
+    <string name="menu_events_on_map_panning">Panning</string>
 </resources>
