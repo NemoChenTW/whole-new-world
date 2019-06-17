@@ -15,6 +15,44 @@
             android:name="com.tomtom.online.sdk.map.MapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/layout_edittext"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/layout_height_xlarge"
+            android:background="@color/white_fully_opaque"
+            android:paddingBottom="@dimen/spacing_small"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <EditText
+                android:id="@+id/edittext_main_poisearch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_small"
+                android:background="@android:color/transparent"
+                android:hint="@string/poisearch_hint"
+                android:imeOptions="actionSearch"
+                android:textSize="@dimen/text_size_normal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/btn_main_poisearch"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:inputType="text" />
+
+            <ImageButton
+                android:id="@+id/btn_main_poisearch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/spacing_small"
+                android:layout_marginTop="@dimen/spacing_xtiny"
+                android:adjustViewBounds="true"
+                android:background="@android:color/transparent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@android:drawable/ic_menu_search" />
+
+        </android.support.constraint.ConstraintLayout>
     </FrameLayout>
 
 </android.support.constraint.ConstraintLayout>

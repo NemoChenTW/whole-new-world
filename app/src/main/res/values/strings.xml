@@ -3,4 +3,5 @@
     <string name="menu_events_on_map_click">Single Press</string>
     <string name="menu_events_on_map_long_click">Long Press</string>
     <string name="menu_events_on_map_panning">Panning</string>
+    <string name="poisearch_hint">Kind of place to add to your route</string>
 </resources>
