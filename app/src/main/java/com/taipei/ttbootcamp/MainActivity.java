@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private TomtomMap tomtomMap;
     private SearchApi searchApi;
 
+    // UI items
     private ImageButton btnSearch;
     private EditText editTextPois;
 
@@ -38,10 +39,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initUIViews();
-
         MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         mapFragment.getAsyncMap(onMapReadyCallback);
+
+        initUIViews();
         initTomTomServices();
 
         View.OnClickListener searchButtonListener = getSearchButtonListener();
