@@ -4,4 +4,11 @@
     <string name="menu_events_on_map_long_click">Long Press</string>
     <string name="menu_events_on_map_panning">Panning</string>
     <string name="poisearch_hint">Kind of place to add to your route</string>
+    <string name="add_to_my_route">Add to my route</string>
+    <string name="add_to_departure">Set Departure</string>
+    <string name="add_to_destination">Set Destination</string>
+    <string name="clean_waypoint">Clear all WP</string>
+    <string name="poi_name_key">poiName</string>
+    <string name="address_key">address</string>
+    <string name="geocode_no_results">No geocoder results. Choose different location and try again.</string>
 </resources>
