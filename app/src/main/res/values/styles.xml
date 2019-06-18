@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -7,5 +7,15 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+
+    <style name="POIButtonStyle">
+        <item name="android:layout_marginTop">@dimen/spacing_small</item>
+        <!--<item name="android:layout_marginBottom">@dimen/spacing_small</item>-->
+        <item name="android:layout_marginStart">@dimen/spacing_xtiny</item>
+        <item name="android:layout_marginEnd">@dimen/spacing_xtiny</item>
+        <item name="android:paddingStart">@dimen/spacing_xsmall</item>
+        <item name="android:paddingEnd">@dimen/spacing_xsmall</item>
+    </style>
+
 
 </resources>
