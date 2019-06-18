@@ -20,10 +20,18 @@ import com.tomtom.online.sdk.map.MapFragment;
 import com.tomtom.online.sdk.map.MarkerBuilder;
 import com.tomtom.online.sdk.map.OnMapReadyCallback;
 import com.tomtom.online.sdk.map.Route;
+import com.tomtom.online.sdk.map.RouteBuilder;
 import com.tomtom.online.sdk.map.TomtomMap;
 import com.tomtom.online.sdk.map.TomtomMapCallback;
 import com.tomtom.online.sdk.routing.OnlineRoutingApi;
 import com.tomtom.online.sdk.routing.RoutingApi;
+import com.tomtom.online.sdk.routing.data.FullRoute;
+import com.tomtom.online.sdk.routing.data.Instruction;
+import com.tomtom.online.sdk.routing.data.InstructionsType;
+import com.tomtom.online.sdk.routing.data.RouteQuery;
+import com.tomtom.online.sdk.routing.data.RouteQueryBuilder;
+import com.tomtom.online.sdk.routing.data.RouteResponse;
+import com.tomtom.online.sdk.routing.data.RouteType;
 import com.tomtom.online.sdk.search.OnlineSearchApi;
 import com.tomtom.online.sdk.search.SearchApi;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchQueryBuilder;
@@ -62,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
 
         View.OnClickListener searchButtonListener = getSearchButtonListener();
         btnSearch.setOnClickListener(searchButtonListener);
+
+        routePlanner = new RoutePlanner();
     }
 
     private View.OnClickListener getSearchButtonListener() {
@@ -123,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
                     //tomtomMap.getMarkerSettings().setMarkerBalloonViewAdapter(createCustomViewAdapter());
 
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), tomtomMap);
-                    routePlanner = new RoutePlanner(tomtomMap, routingApi, mMapElementDisplayer);
                 }
             };
 
@@ -178,6 +187,91 @@ public class MainActivity extends AppCompatActivity {
                     .icon(iconMarkLocation)
                     .tag(MARK_LOCATION_TAG));
         }
+    }
+/*
+    private SingleLayoutBalloonViewAdapter createCustomViewAdapter() {
+        return new SingleLayoutBalloonViewAdapter(R.layout.marker_custom_balloon) {
+
+            @Override
+            public void onBindView(View view, final Marker marker, BaseMarkerBalloon baseMarkerBalloon) {
+                Button btnAddWayPoint = view.findViewById(R.id.btn_balloon_waypoint);
+                TextView textViewPoiName = view.findViewById(R.id.textview_balloon_poiname);
+                TextView textViewPoiAddress = view.findViewById(R.id.textview_balloon_poiaddress);
+                textViewPoiName.setText(baseMarkerBalloon.getStringProperty(getApplicationContext().getString(R.string.poi_name_key)));
+                textViewPoiAddress.setText(baseMarkerBalloon.getStringProperty(getApplicationContext().getString(R.string.address_key)));
+                btnAddWayPoint.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        setWayPoint(marker);
+                    }
+
+                    private void setWayPoint(Marker marker) {
+                        wayPointPosition = marker.getPosition();
+                        tomtomMap.clearRoute();
+                        drawRouteWithWayPoints(departurePosition, destinationPosition, new LatLng[] {wayPointPosition});
+                        marker.deselect();
+                    }
+                });
+            }
+        };
+    }
+*/
+
+    private void displayRoutes(List<FullRoute> routes) {
+        for (FullRoute fullRoute : routes) {
+            Log.d("pandia", fullRoute.getSummary().toString());
+            for (Instruction instruction : fullRoute.getGuidance().getInstructions())
+            {
+                //System.out.println(instruction.getMessage() + " " + instruction.getManeuver() + " " + instruction.getCombinedMessage());
+                Log.d("pandia", instruction.getMessage() + " " + instruction.getManeuver() + " " + instruction.getCombinedMessage());
+            }
+            route = tomtomMap.addRoute(new RouteBuilder(
+                    fullRoute.getCoordinates()).startIcon(departureIcon).endIcon(destinationIcon).isActive(true));
+        }
+    }
+
+    private void planRoute(LatLng start, LatLng end, LatLng[] waypoints) {
+        if (start != null && end != null) {
+            tomtomMap.clearRoute();
+            RouteQuery routeQuery = createRouteQuery(start, end, waypoints);
+            routingApi.planRoute(routeQuery)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new DisposableSingleObserver<RouteResponse>() {
+                        @Override
+                        public void onSuccess(RouteResponse routeResult) {
+                            displayRoutes(routeResult.getRoutes());
+                            tomtomMap.displayRoutesOverview();
+                        }
+
+                        private void displayRoutes(List<FullRoute> routes) {
+                            for (FullRoute fullRoute : routes) {
+                                Log.d("pandia", fullRoute.getSummary().toString());
+                                for (Instruction instruction : fullRoute.getGuidance().getInstructions())
+                                {
+                                    //System.out.println(instruction.getMessage() + " " + instruction.getManeuver() + " " + instruction.getCombinedMessage());
+                                    Log.d("pandia", instruction.getMessage() + " " + instruction.getManeuver() + " " + instruction.getCombinedMessage());
+                                }
+                                route = tomtomMap.addRoute(new RouteBuilder(
+                                        fullRoute.getCoordinates()).startIcon(departureIcon).endIcon(destinationIcon).isActive(true));
+                            }
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            //handleApiError(e);
+                            //clearMap();
+                        }
+                    });
+        }
+    }
+
+    private RouteQuery createRouteQuery(LatLng start, LatLng stop, LatLng[] wayPoints) {
+        return (wayPoints != null && wayPoints.length != 0) ?
+                new RouteQueryBuilder(start, stop).withWayPoints(wayPoints).withRouteType(RouteType.FASTEST)
+                        .withInstructionsType(InstructionsType.TAGGED).build():
+                new RouteQueryBuilder(start, stop).withRouteType(RouteType.FASTEST)
+                        .withInstructionsType(InstructionsType.TAGGED).build();
     }
 
     private void updateMarkers() {
