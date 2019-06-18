@@ -13,12 +13,14 @@
         android:name="com.tomtom.online.sdk.map.MapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
     <android.support.constraint.ConstraintLayout
         android:id="@+id/layout_edittext"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/layout_height_xlarge"
+        android:layout_height="@dimen/layout_height_large"
+        android:layout_marginLeft="45dp"
         android:background="@color/white_fully_opaque"
-        android:paddingBottom="@dimen/spacing_small"
+        android:paddingBottom="@dimen/spacing_xsmall"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -27,7 +29,7 @@
             android:id="@+id/edittext_main_poisearch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/spacing_small"
+            android:layout_marginStart="@dimen/spacing_xtiny"
             android:background="@android:color/transparent"
             android:hint="@string/poisearch_hint"
             android:imeOptions="actionSearch"

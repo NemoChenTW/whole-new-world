@@ -4,117 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-<!--
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        >
-
-        <TextView
-            android:id="@+id/textview_balloon_poiname1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/spacing_xsmall"
-            android:layout_marginStart="@dimen/spacing_xsmall"
-            android:layout_marginTop="@dimen/spacing_xsmall"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/textview_balloon_poiaddress1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/spacing_xsmall"
-            android:layout_marginStart="@dimen/spacing_xsmall" />
-
-        <Button
-            android:id="@+id/btn_balloon_departure1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/spacing_small"
-            android:layout_marginEnd="@dimen/spacing_small"
-            android:layout_marginStart="@dimen/spacing_small"
-            android:layout_marginTop="@dimen/spacing_small"
-            android:background="@drawable/bg_balloon_button"
-            android:paddingBottom="@dimen/spacing_xtiny"
-            android:paddingLeft="@dimen/spacing_small"
-            android:paddingRight="@dimen/spacing_small"
-            android:paddingTop="@dimen/spacing_xtiny"
-            android:text="@string/add_to_departure"
-            android:textAlignment="center"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/btn_balloon_waypoint1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/spacing_small"
-            android:layout_marginEnd="@dimen/spacing_small"
-            android:layout_marginStart="@dimen/spacing_small"
-            android:layout_marginTop="@dimen/spacing_small"
-            android:background="@drawable/bg_balloon_button"
-            android:paddingBottom="@dimen/spacing_xtiny"
-            android:paddingLeft="@dimen/spacing_small"
-            android:paddingRight="@dimen/spacing_small"
-            android:paddingTop="@dimen/spacing_xtiny"
-            android:text="@string/add_to_my_route"
-            android:textAlignment="center"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/btn_balloon_destination1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/spacing_small"
-            android:layout_marginEnd="@dimen/spacing_small"
-            android:layout_marginStart="@dimen/spacing_small"
-            android:layout_marginTop="@dimen/spacing_small"
-            android:background="@drawable/bg_balloon_button"
-            android:paddingBottom="@dimen/spacing_xtiny"
-            android:paddingLeft="@dimen/spacing_small"
-            android:paddingRight="@dimen/spacing_small"
-            android:paddingTop="@dimen/spacing_xtiny"
-            android:text="@string/add_to_destination"
-            android:textAlignment="center"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/btn_balloon_clearwaypoint1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/spacing_small"
-            android:layout_marginEnd="@dimen/spacing_small"
-            android:layout_marginStart="@dimen/spacing_small"
-            android:layout_marginTop="@dimen/spacing_small"
-            android:background="@drawable/bg_balloon_button"
-            android:paddingBottom="@dimen/spacing_xtiny"
-            android:paddingLeft="@dimen/spacing_small"
-            android:paddingRight="@dimen/spacing_small"
-            android:paddingTop="@dimen/spacing_xtiny"
-            android:text="@string/clean_waypoint"
-            android:textAlignment="center"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-    -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
         <include layout="@layout/content_main" />
-<!--
-        <fragment
-            android:id="@+id/map_fragment"
-            android:name="com.tomtom.online.sdk.map.MapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-            -->
         <include layout="@layout/marker_custom_balloon" />
 
     </FrameLayout>
