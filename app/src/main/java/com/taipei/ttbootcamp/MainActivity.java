@@ -15,6 +15,7 @@ import com.google.common.base.Optional;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.map.Icon;
 import com.tomtom.online.sdk.map.MapFragment;
+import com.tomtom.online.sdk.map.Marker;
 import com.tomtom.online.sdk.map.MarkerBuilder;
 import com.tomtom.online.sdk.map.OnMapReadyCallback;
 import com.tomtom.online.sdk.map.Route;
@@ -155,48 +156,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleLongClick(@NonNull LatLng latLng) {
+        updateMarkLocation(latLng);
         currentLatLng = latLng;
-        //currentPosition.setText(latLng.toString());
-        /*
-        searchApi.reverseGeocoding(new ReverseGeocoderSearchQueryBuilder(latLng.getLatitude(), latLng.getLongitude()).build())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new DisposableSingleObserver<ReverseGeocoderSearchResponse>() {
-                    @Override
-                    public void onSuccess(ReverseGeocoderSearchResponse response) {
-                        processResponse(response);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        //handleApiError(e);
-                    }
-
-                    private void processResponse(ReverseGeocoderSearchResponse response) {
-                        if (response.hasResults()) {
-                            processFirstResult(response.getAddresses().get(0).getPosition());
-                        }
-                        else {
-                            Toast.makeText(MainActivity.this, getString(R.string.geocode_no_results), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    private void processFirstResult(LatLng geocodedPosition) {
-                        if (!isDeparturePositionSet()) {
-                            setAndDisplayDeparturePosition(geocodedPosition);
-                        } else {
-                            destinationPosition = geocodedPosition;
-                            tomtomMap.removeMarkers();
-                            //drawRoute(departurePosition, destinationPosition);
-                        }
-                    }
-
-                    private void setAndDisplayDeparturePosition(LatLng geocodedPosition) {
-                        departurePosition = geocodedPosition;
-                        createMarkerIfNotPresent(departurePosition, departureIcon);
-                    }
-                });
-                */
     }
 
     private boolean isDestinationPositionSet() {
@@ -212,6 +173,16 @@ public class MainActivity extends AppCompatActivity {
         if (!optionalMarker.isPresent()) {
             tomtomMap.addMarker(new MarkerBuilder(position)
                     .icon(icon));
+        }
+    }
+
+    private void updateMarkLocation(LatLng position) {
+        tomtomMap.removeMarkerByTag(MARK_LOCATION_TAG);
+        Optional optionalMarker = tomtomMap.findMarkerByPosition(position);
+        if (!optionalMarker.isPresent()) {
+            tomtomMap.addMarker(new MarkerBuilder(position)
+                    .icon(iconMarkLocation)
+                    .tag(MARK_LOCATION_TAG));
         }
     }
 /*
@@ -306,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
         departureIcon = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_map_route_departure);
         destinationIcon = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_map_route_destination);
         waypointIcon = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_map_traffic_danger_midgrey_small);
+        iconMarkLocation = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_markedlocation);
 
         btnSearch = findViewById(R.id.btn_main_poisearch);
         editTextPois = findViewById(R.id.edittext_main_poisearch);
@@ -375,6 +347,7 @@ public class MainActivity extends AppCompatActivity {
     private Icon departureIcon;
     private Icon destinationIcon;
     private Icon waypointIcon;
+    private Icon iconMarkLocation;
     private TextView currentPosition;
     private LatLng currentLatLng;
     private Button departureBtn;
@@ -384,4 +357,5 @@ public class MainActivity extends AppCompatActivity {
     private Route route;
     private ArrayList<LatLng> allWaypoints = new ArrayList<LatLng>();
     private RoutePlanner routePlanner;
+    static final private String MARK_LOCATION_TAG = "mark_location_tag";
 }
