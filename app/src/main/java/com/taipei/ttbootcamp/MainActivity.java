@@ -1,39 +1,26 @@
 package com.taipei.ttbootcamp;
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
-
-import android.widget.EditText;
-import android.widget.ImageButton;
-
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.PopupMenu;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.common.base.Optional;
 import com.tomtom.online.sdk.common.location.LatLng;
-import com.tomtom.online.sdk.map.BaseMarkerBalloon;
 import com.tomtom.online.sdk.map.Icon;
 import com.tomtom.online.sdk.map.MapFragment;
-import com.tomtom.online.sdk.map.Marker;
 import com.tomtom.online.sdk.map.MarkerBuilder;
 import com.tomtom.online.sdk.map.OnMapReadyCallback;
 import com.tomtom.online.sdk.map.Route;
 import com.tomtom.online.sdk.map.RouteBuilder;
-import com.tomtom.online.sdk.map.SingleLayoutBalloonViewAdapter;
 import com.tomtom.online.sdk.map.TomtomMap;
 import com.tomtom.online.sdk.map.TomtomMapCallback;
-
-import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchQueryBuilder;
-import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResponse;
-import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
-
 import com.tomtom.online.sdk.routing.OnlineRoutingApi;
 import com.tomtom.online.sdk.routing.RoutingApi;
 import com.tomtom.online.sdk.routing.data.FullRoute;
@@ -45,8 +32,9 @@ import com.tomtom.online.sdk.routing.data.RouteResponse;
 import com.tomtom.online.sdk.routing.data.RouteType;
 import com.tomtom.online.sdk.search.OnlineSearchApi;
 import com.tomtom.online.sdk.search.SearchApi;
-import com.tomtom.online.sdk.search.data.reversegeocoder.ReverseGeocoderSearchQueryBuilder;
-import com.tomtom.online.sdk.search.data.reversegeocoder.ReverseGeocoderSearchResponse;
+import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchQueryBuilder;
+import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResponse;
+import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
 import java.util.ArrayList;
 import java.util.List;
