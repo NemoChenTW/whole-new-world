@@ -43,6 +43,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
+import com.taipei.ttbootcamp.RoutePlanner.*;
+
 public class MainActivity extends AppCompatActivity {
     static final String TAG = "MainActivity";
 
@@ -66,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
 
         View.OnClickListener searchButtonListener = getSearchButtonListener();
         btnSearch.setOnClickListener(searchButtonListener);
+
+        routePlanner = new RoutePlanner();
     }
 
     private View.OnClickListener getSearchButtonListener() {
@@ -318,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
                 if (currentLatLng != null) {
                     departurePosition = new LatLng(currentLatLng.toLocation());
                 }
-                planRoute(departurePosition, destinationPosition, allWaypoints.toArray(new LatLng[0]));
+                routePlanner.planRoute(departurePosition, destinationPosition, allWaypoints.toArray(new LatLng[0]), tomtomMap, routingApi);
                 updateMarkers();
             }
         });
@@ -330,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
                 if (currentLatLng != null) {
                     destinationPosition = new LatLng(currentLatLng.toLocation());
                 }
-                planRoute(departurePosition, destinationPosition, allWaypoints.toArray(new LatLng[0]));
+                routePlanner.planRoute(departurePosition, destinationPosition, allWaypoints.toArray(new LatLng[0]), tomtomMap, routingApi);
                 updateMarkers();
             }
         });
@@ -339,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d("pandia", "clear btn");
-                planRoute(departurePosition, destinationPosition, null);
+                routePlanner.planRoute(departurePosition, destinationPosition, null, tomtomMap, routingApi);
                 allWaypoints.clear();
                 updateMarkers();
             }
@@ -352,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
                 if (currentLatLng != null) {
                     allWaypoints.add(new LatLng(currentLatLng.toLocation()));
                 }
-                planRoute(departurePosition, destinationPosition, allWaypoints.toArray(new LatLng[0]));
+                routePlanner.planRoute(departurePosition, destinationPosition, allWaypoints.toArray(new LatLng[0]), tomtomMap, routingApi);
                 updateMarkers();
             }
         });
@@ -379,4 +383,5 @@ public class MainActivity extends AppCompatActivity {
     private Button clearWaypointBtn;
     private Route route;
     private ArrayList<LatLng> allWaypoints = new ArrayList<LatLng>();
+    private RoutePlanner routePlanner;
 }
