@@ -14,6 +14,7 @@ import com.tomtom.online.sdk.routing.data.RouteQuery;
 import com.tomtom.online.sdk.routing.data.RouteQueryBuilder;
 import com.tomtom.online.sdk.routing.data.RouteResponse;
 import com.tomtom.online.sdk.routing.data.RouteType;
+import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
 import java.util.ArrayList;
 
@@ -48,7 +49,8 @@ public class RoutePlanner {
                                 Log.d("Nick", route.getCoordinates().toString());
                                 for (Instruction instruction : route.getGuidance().getInstructions())
                                 {
-                                    POIWithTravelTime poiWithTravelTime = new POIWithTravelTime();
+                                    FuzzySearchResult fuzzySearchResult = new FuzzySearchResult();
+                                    POIWithTravelTime poiWithTravelTime = new POIWithTravelTime(fuzzySearchResult, 0);
                                     poiWithTravelTime.travelTime = 0;
                                     result.add(poiWithTravelTime);
                                     if (instruction.getInstructionType().equals("LOCATION_WAYPOINT") ||
