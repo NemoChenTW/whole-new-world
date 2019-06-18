@@ -70,8 +70,6 @@ public class MainActivity extends AppCompatActivity {
 
         View.OnClickListener searchButtonListener = getSearchButtonListener();
         btnSearch.setOnClickListener(searchButtonListener);
-
-        routePlanner = new RoutePlanner();
     }
 
     private View.OnClickListener getSearchButtonListener() {
@@ -133,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
                     //tomtomMap.getMarkerSettings().setMarkerBalloonViewAdapter(createCustomViewAdapter());
 
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), tomtomMap);
+                    routePlanner = new RoutePlanner(tomtomMap, routingApi, mMapElementDisplayer);
                 }
             };
 
