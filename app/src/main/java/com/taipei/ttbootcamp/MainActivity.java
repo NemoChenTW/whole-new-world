@@ -12,10 +12,11 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.common.base.Optional;
+import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
+import com.taipei.ttbootcamp.implement.MapElementDisplayer;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.map.Icon;
 import com.tomtom.online.sdk.map.MapFragment;
-import com.tomtom.online.sdk.map.Marker;
 import com.tomtom.online.sdk.map.MarkerBuilder;
 import com.tomtom.online.sdk.map.OnMapReadyCallback;
 import com.tomtom.online.sdk.map.Route;
@@ -44,13 +45,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
-import com.taipei.ttbootcamp.RoutePlanner.*;
-
 public class MainActivity extends AppCompatActivity {
     static final String TAG = "MainActivity";
 
     // TomTom service
     private TomtomMap tomtomMap;
+
+    private MapElementDisplayer mMapElementDisplayer;
 
     // UI items
     private ImageButton btnSearch;
@@ -130,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
                     tomtomMap.addOnMapLongClickListener(onMapLongClickListener);
                     tomtomMap.addOnMapViewPortChangedListener(onMapViewPortChangedListener);
                     //tomtomMap.getMarkerSettings().setMarkerBalloonViewAdapter(createCustomViewAdapter());
+
+                    mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), tomtomMap);
                 }
             };
 
@@ -213,6 +216,20 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 */
+
+    private void displayRoutes(List<FullRoute> routes) {
+        for (FullRoute fullRoute : routes) {
+            Log.d("pandia", fullRoute.getSummary().toString());
+            for (Instruction instruction : fullRoute.getGuidance().getInstructions())
+            {
+                //System.out.println(instruction.getMessage() + " " + instruction.getManeuver() + " " + instruction.getCombinedMessage());
+                Log.d("pandia", instruction.getMessage() + " " + instruction.getManeuver() + " " + instruction.getCombinedMessage());
+            }
+            route = tomtomMap.addRoute(new RouteBuilder(
+                    fullRoute.getCoordinates()).startIcon(departureIcon).endIcon(destinationIcon).isActive(true));
+        }
+    }
+
     private void planRoute(LatLng start, LatLng end, LatLng[] waypoints) {
         if (start != null && end != null) {
             tomtomMap.clearRoute();
@@ -274,10 +291,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initUIViews() {
-        departureIcon = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_map_route_departure);
-        destinationIcon = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_map_route_destination);
-        waypointIcon = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_map_traffic_danger_midgrey_small);
-        iconMarkLocation = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_markedlocation);
+        initMapRelatedElement();
 
         btnSearch = findViewById(R.id.btn_main_poisearch);
         editTextPois = findViewById(R.id.edittext_main_poisearch);
@@ -332,6 +346,13 @@ public class MainActivity extends AppCompatActivity {
                 updateMarkers();
             }
         });
+    }
+
+    private void initMapRelatedElement() {
+        departureIcon = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_map_route_departure);
+        destinationIcon = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_map_route_destination);
+        waypointIcon = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_map_traffic_danger_midgrey_small);
+        iconMarkLocation = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_markedlocation);
     }
 
     private void initTomTomServices() {
