@@ -21,7 +21,8 @@ public class POIGenerator {
     public enum POITYPE {
         MUSEUM,
         ART,
-        FOOD
+        FOOD,
+        HOTEL
     }
 
     private static final int STANDARD_RADIUS = 30 * 1000; //30 km
@@ -39,24 +40,21 @@ public class POIGenerator {
             case FOOD:
                 ret = "food";
                 break;
+            case HOTEL:
+                ret = "hotel";
+                break;
             default:
                 break;
         }
         return ret;
     }
 
-    public static void getPOIsWithType(Context context, LatLng currentPosition, POITYPE poitype) {
-        if (context == null) {
-            Log.e(TAG, "Context is null.");
-            return;
-        }
-        SearchApi searchApi = OnlineSearchApi.create(context);
-
+    public static void getPOIsWithType(SearchApi searchApi, LatLng currentPosition, POITYPE poitype, int radius) {
         String textToSearch = convertPOITypeToText(poitype);
 
         final Integer QUERY_LIMIT = 10;
         searchApi.search(new FuzzySearchQueryBuilder(textToSearch)
-                .withPreciseness(new LatLngAcc(currentPosition, STANDARD_RADIUS))
+                .withPreciseness(new LatLngAcc(currentPosition, radius))
                 .withTypeAhead(true)
                 .withCategory(true)
                 .withLimit(QUERY_LIMIT).build())
