@@ -2,6 +2,8 @@ package com.taipei.ttbootcamp.dailydecorator;
 
 import android.util.Log;
 
+import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
+import com.taipei.ttbootcamp.interfaces.IPOIWithTravelTimeResult;
 import com.taipei.ttbootcamp.interfaces.POIWithTravelTime;
 import com.taipei.ttbootcamp.poigenerator.POIGenerator;
 import com.tomtom.online.sdk.search.SearchApi;
@@ -18,14 +20,16 @@ public class DailyNeedDecorator {
     private static final int DEFAULT_HOTEL_RADIUS = 30;
 
 
-    public static ArrayList<POIWithTravelTime> generateDailyNeed(ArrayList<POIWithTravelTime> tripDraft, SearchApi searchApi) {
+    public static ArrayList<POIWithTravelTime> generateDailyNeed(ArrayList<POIWithTravelTime> tripDraft,
+                                                                 SearchApi searchApi, IPOIWithTravelTimeResult resultCallback) {
         ArrayList<POIWithTravelTime> proposedTrip = new ArrayList<POIWithTravelTime>();
-        addRestaurants(tripDraft, searchApi, proposedTrip);
+        addRestaurants(tripDraft, searchApi, proposedTrip, resultCallback);
         addHotel(searchApi, proposedTrip);
         return proposedTrip;
     }
 
-    private static void addRestaurants(ArrayList<POIWithTravelTime> tripDraft, SearchApi searchApi, ArrayList<POIWithTravelTime> proposedTrip) {
+    private static void addRestaurants(ArrayList<POIWithTravelTime> tripDraft, SearchApi searchApi,
+                                       ArrayList<POIWithTravelTime> proposedTrip, IPOIWithTravelTimeResult resultCallback) {
         Calendar rightNow = Calendar.getInstance();
         //int hour = rightNow.get(Calendar.HOUR_OF_DAY);
         //int minute = rightNow.get(Calendar.MINUTE);
@@ -53,7 +57,16 @@ public class DailyNeedDecorator {
                 POIWithTravelTime restaurantPoint = new POIWithTravelTime(new FuzzySearchResult(), 13*60);
 
                 //TODO callback restaurant and add to list.
-                //POIGenerator.getPOIsWithType(searchApi, tripItem.reqult.getPosition(), POIGenerator.POITYPE.FOOD, DEFAULT_RESTAURANT_RADIUS);
+                POIGenerator.getPOIsWithType(searchApi, tripItem.result.getPosition(), POIGenerator.POITYPE.FOOD, DEFAULT_RESTAURANT_RADIUS,
+                        new IPOISearchResult() {
+                            @Override
+                            public void onPOISearchResult(ArrayList<FuzzySearchResult> searchResult) {
+                                if (!searchResult.isEmpty()) {
+
+                                }
+                            }
+                        }
+                );
 
                 isAddLunch = isNoon(accumSecondNow);
                 isAddDinner = isEvening(accumSecondNow);

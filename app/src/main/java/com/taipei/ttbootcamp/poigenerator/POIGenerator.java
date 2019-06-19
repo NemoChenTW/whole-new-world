@@ -3,6 +3,8 @@ package com.taipei.ttbootcamp.poigenerator;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.common.collect.ImmutableList;
+import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.common.location.LatLngAcc;
 import com.tomtom.online.sdk.search.OnlineSearchApi;
@@ -10,6 +12,9 @@ import com.tomtom.online.sdk.search.SearchApi;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchQueryBuilder;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResponse;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
@@ -49,7 +54,8 @@ public class POIGenerator {
         return ret;
     }
 
-    public static void getPOIsWithType(SearchApi searchApi, LatLng currentPosition, POITYPE poitype, int radius) {
+    public static void getPOIsWithType(SearchApi searchApi, LatLng currentPosition,
+                                       POITYPE poitype, int radius, IPOISearchResult searchResultCallback) {
         String textToSearch = convertPOITypeToText(poitype);
 
         final Integer QUERY_LIMIT = 10;
@@ -67,11 +73,22 @@ public class POIGenerator {
                         for (FuzzySearchResult fuzzySearchResult : fuzzySearchResponse.getResults()) {
                             Log.d(TAG, "fuzzySearchResult: " + fuzzySearchResult.toString());
                         }
+                        filterResult(fuzzySearchResponse.getResults());
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         Log.d(TAG, "Search error: " + e.getMessage());
+                    }
+
+                    private void filterResult(ImmutableList<FuzzySearchResult> draftResult) {
+                        ArrayList<FuzzySearchResult> filteredResult = new ArrayList<>();
+
+                        for (FuzzySearchResult fuzzySearchResult : draftResult) {
+                            filteredResult.add(fuzzySearchResult);
+                        }
+
+                        searchResultCallback.onPOISearchResult(filteredResult);
                     }
                 });
     }
