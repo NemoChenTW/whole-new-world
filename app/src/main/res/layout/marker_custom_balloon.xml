@@ -37,11 +37,7 @@
             android:id="@+id/btn_balloon_departure"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_balloon_button"
-            android:text="@string/add_to_departure"
-            android:textAlignment="center"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
+            android:text="@string/add_to_departure" />
 
         <Button
             style="@style/POIButtonStyle"
@@ -49,11 +45,7 @@
             android:layout_toEndOf="@id/btn_balloon_departure"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_balloon_button"
-            android:text="@string/add_to_my_route"
-            android:textAlignment="center"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
+            android:text="@string/add_to_my_route" />
 
         <Button
             style="@style/POIButtonStyle"
@@ -61,11 +53,7 @@
             android:layout_toEndOf="@id/btn_balloon_waypoint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_balloon_button"
-            android:text="@string/add_to_destination"
-            android:textAlignment="center"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
+            android:text="@string/add_to_destination" />
 
         <Button
             style="@style/POIButtonStyle"
@@ -73,11 +61,7 @@
             android:layout_below="@id/btn_balloon_destination"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_balloon_button"
-            android:text="@string/clean_waypoint"
-            android:textAlignment="center"
-            android:textSize="@dimen/text_size_small"
-            android:textStyle="bold" />
+            android:text="@string/clean_waypoint" />
 
     </RelativeLayout>
 
