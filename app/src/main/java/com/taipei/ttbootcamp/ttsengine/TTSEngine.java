@@ -19,15 +19,15 @@ public class TTSEngine {
         }
     }
 
-    public void say(String text, Locale locale) {
-        if( tts.isLanguageAvailable(locale) == TextToSpeech.LANG_COUNTRY_AVAILABLE ) {
+    public void speak(String text, Locale locale) {
+        if (tts.isLanguageAvailable(locale) == TextToSpeech.LANG_COUNTRY_AVAILABLE) {
             tts.setLanguage(locale);
         }
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null );
     }
 
     private void createLanguageTTS(Context context) {
-        if( tts == null ) {
+        if (tts == null) {
             tts = new TextToSpeech(context, arg0 -> {
                 if( arg0 == TextToSpeech.SUCCESS ) {
                     Locale l = Locale.US;
