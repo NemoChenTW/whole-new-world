@@ -54,8 +54,14 @@ public class MainActivity extends AppCompatActivity {
 
     // TomTom service
     private TomtomMap tomtomMap;
+    private RoutingApi routingApi;
+    private SearchApi searchApi;
 
     private MapElementDisplayer mMapElementDisplayer;
+    private RoutePlanner routePlanner;
+    private Controller controller;
+
+    // View
     private PopupWindow popupWindow;
     private View rootView;
 
@@ -63,6 +69,12 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton btnSearch;
     private EditText editTextPois;
     private TTSEngine mTTSEngine;
+    private Button departureBtn;
+    private Button destinationBtn;
+    private Button addWaypointBtn;
+    private Button clearWaypointBtn;
+
+    private TextView currentPosition;
 
     private BootcampBroadcastReceiver bootcampBroadcastReceiver = new BootcampBroadcastReceiver();
 
@@ -352,16 +364,6 @@ public class MainActivity extends AppCompatActivity {
         routingApi = OnlineRoutingApi.create(this);
 
     }
-
-    private RoutingApi routingApi;
-    private SearchApi searchApi;
-    private TextView currentPosition;
-    private Button departureBtn;
-    private Button destinationBtn;
-    private Button addWaypointBtn;
-    private Button clearWaypointBtn;
-    private RoutePlanner routePlanner;
-    private Controller controller;
 
     public class BootcampBroadcastReceiver extends BroadcastReceiver {
         static private final String TAG = "BootcampBroadcast";
