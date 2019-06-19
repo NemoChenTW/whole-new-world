@@ -55,6 +55,7 @@ public class MapElementDisplayer implements IMapElementDisplay {
     }
 
     public void displayRoutes(List<FullRoute> routes) {
+        mTomtomMap.clearRoute();
         for (FullRoute fullRoute : routes) {
             mTomtomMap.addRoute(new RouteBuilder(
                     fullRoute.getCoordinates()).startIcon(mIconDeparture).endIcon(mIconDestination).isActive(true));
