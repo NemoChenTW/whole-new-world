@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
@@ -18,25 +17,19 @@ import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import com.google.common.base.Optional;
 import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
 import com.taipei.ttbootcamp.implement.MapElementDisplayer;
 import com.taipei.ttbootcamp.interfaces.IPOIWithTravelTimeResult;
 import com.taipei.ttbootcamp.interfaces.POIWithTravelTime;
 import com.taipei.ttbootcamp.ttsengine.TTSEngine;
 import com.tomtom.online.sdk.common.location.LatLng;
-import com.tomtom.online.sdk.map.Icon;
 import com.tomtom.online.sdk.map.MapFragment;
-import com.tomtom.online.sdk.map.MarkerBuilder;
 import com.tomtom.online.sdk.map.OnMapReadyCallback;
 import com.tomtom.online.sdk.map.Route;
-import com.tomtom.online.sdk.map.RouteBuilder;
 import com.tomtom.online.sdk.map.TomtomMap;
 import com.tomtom.online.sdk.map.TomtomMapCallback;
 import com.tomtom.online.sdk.routing.OnlineRoutingApi;
 import com.tomtom.online.sdk.routing.RoutingApi;
-import com.tomtom.online.sdk.routing.data.FullRoute;
-import com.tomtom.online.sdk.routing.data.Instruction;
 import com.tomtom.online.sdk.routing.data.InstructionsType;
 import com.tomtom.online.sdk.routing.data.RouteQuery;
 import com.tomtom.online.sdk.routing.data.RouteQueryBuilder;
@@ -49,7 +42,6 @@ import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResponse;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -92,6 +84,13 @@ public class MainActivity extends AppCompatActivity {
         initPopup();
         // Create TTS engine
         mTTSEngine = new TTSEngine(this);
+    }
+
+    private TomtomMapCallback.OnMapLongClickListener onMapLongClickListener =
+            latLng -> handleLongClick(latLng);
+
+    private void handleLongClick(LatLng latLng) {
+        displayMarkerFeatureMenu(true);
     }
 
     @Override
@@ -197,11 +196,9 @@ public class MainActivity extends AppCompatActivity {
                     tomtomMap = map;
                     tomtomMap.setMyLocationEnabled(true);
 //                    tomtomMap.collectLogsToFile(SampleApp.LOGCAT_PATH);
-                    tomtomMap.addOnMapClickListener(onMapClickListener);
-                    tomtomMap.addOnMapLongClickListener(onMapLongClickListener);
-                    tomtomMap.addOnMapViewPortChangedListener(onMapViewPortChangedListener);
                     //tomtomMap.getMarkerSettings().setMarkerBalloonViewAdapter(createCustomViewAdapter());
 
+                    tomtomMap.addOnMapLongClickListener(onMapLongClickListener);
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), tomtomMap);
                     routePlanner = new RoutePlanner(routingApi, mMapElementDisplayer, new IPOIWithTravelTimeResult() {
                         @Override
@@ -212,59 +209,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
 
-    private TomtomMapCallback.OnMapClickListener onMapClickListener =
-            latLng -> displayMessage(
-                    R.string.menu_events_on_map_click,
-                    latLng.getLatitude(),
-                    latLng.getLongitude()
-            );
-    private TomtomMapCallback.OnMapLongClickListener onMapLongClickListener =
-            latLng -> handleLongClick(latLng);
-
-    private TomtomMapCallback.OnMapViewPortChanged onMapViewPortChangedListener =
-            (focalLatitude, focalLongitude, zoomLevel, perspectiveRatio, yawDegrees) -> displayMessage(
-                    R.string.menu_events_on_map_panning,
-                    focalLatitude,
-                    focalLongitude
-            );
-    private void displayMessage(@StringRes int titleId, double lat, double lon) {
-        String title = this.getString(titleId);
-        String message = String.format(java.util.Locale.getDefault(),
-                "%s : %f : %f", title, lat, lon);
-        Log.d(TAG, "displayMessage: " + message);
-    }
-
-    private void handleLongClick(@NonNull LatLng latLng) {
-        displayMarkerFeatureMenu(true);
-        updateMarkLocation(latLng);
-        currentLatLng = latLng;
-    }
-
-    private boolean isDestinationPositionSet() {
-        return destinationPosition != null;
-    }
-
-    private boolean isDeparturePositionSet() {
-        return departurePosition != null;
-    }
-
-    private void createMarkerIfNotPresent(LatLng position, Icon icon) {
-        Optional optionalMarker = tomtomMap.findMarkerByPosition(position);
-        if (!optionalMarker.isPresent()) {
-            tomtomMap.addMarker(new MarkerBuilder(position)
-                    .icon(icon));
-        }
-    }
-
-    private void updateMarkLocation(LatLng position) {
-        tomtomMap.removeMarkerByTag(MARK_LOCATION_TAG);
-        Optional optionalMarker = tomtomMap.findMarkerByPosition(position);
-        if (!optionalMarker.isPresent()) {
-            tomtomMap.addMarker(new MarkerBuilder(position)
-                    .icon(iconMarkLocation)
-                    .tag(MARK_LOCATION_TAG));
-        }
-    }
 /*
     private SingleLayoutBalloonViewAdapter createCustomViewAdapter() {
         return new SingleLayoutBalloonViewAdapter(R.layout.marker_custom_balloon) {
@@ -294,19 +238,6 @@ public class MainActivity extends AppCompatActivity {
     }
 */
 
-    private void displayRoutes(List<FullRoute> routes) {
-        for (FullRoute fullRoute : routes) {
-            Log.d("pandia", fullRoute.getSummary().toString());
-            for (Instruction instruction : fullRoute.getGuidance().getInstructions())
-            {
-                //System.out.println(instruction.getMessage() + " " + instruction.getManeuver() + " " + instruction.getCombinedMessage());
-                Log.d("pandia", instruction.getMessage() + " " + instruction.getManeuver() + " " + instruction.getCombinedMessage());
-            }
-            route = tomtomMap.addRoute(new RouteBuilder(
-                    fullRoute.getCoordinates()).startIcon(departureIcon).endIcon(destinationIcon).isActive(true));
-        }
-    }
-
     private void planRoute(LatLng start, LatLng end, LatLng[] waypoints) {
         if (start != null && end != null) {
             tomtomMap.clearRoute();
@@ -317,21 +248,8 @@ public class MainActivity extends AppCompatActivity {
                     .subscribe(new DisposableSingleObserver<RouteResponse>() {
                         @Override
                         public void onSuccess(RouteResponse routeResult) {
-                            displayRoutes(routeResult.getRoutes());
+                            mMapElementDisplayer.displayRoutes(routeResult.getRoutes());
                             tomtomMap.displayRoutesOverview();
-                        }
-
-                        private void displayRoutes(List<FullRoute> routes) {
-                            for (FullRoute fullRoute : routes) {
-                                Log.d("pandia", fullRoute.getSummary().toString());
-                                for (Instruction instruction : fullRoute.getGuidance().getInstructions())
-                                {
-                                    //System.out.println(instruction.getMessage() + " " + instruction.getManeuver() + " " + instruction.getCombinedMessage());
-                                    Log.d("pandia", instruction.getMessage() + " " + instruction.getManeuver() + " " + instruction.getCombinedMessage());
-                                }
-                                route = tomtomMap.addRoute(new RouteBuilder(
-                                        fullRoute.getCoordinates()).startIcon(departureIcon).endIcon(destinationIcon).isActive(true));
-                            }
                         }
 
                         @Override
@@ -351,23 +269,7 @@ public class MainActivity extends AppCompatActivity {
                         .withInstructionsType(InstructionsType.TAGGED).build();
     }
 
-    private void updateMarkers() {
-        tomtomMap.removeMarkers();
-
-        if (departurePosition != null) {
-            createMarkerIfNotPresent(departurePosition, departureIcon);
-        }
-
-        if (destinationPosition != null) {
-            createMarkerIfNotPresent(destinationPosition, destinationIcon);
-        }
-
-        for (LatLng wp : allWaypoints) {
-            createMarkerIfNotPresent(wp, waypointIcon);
-        }
-    }
-
-    private void displayMarkerFeatureMenu(boolean display) {
+    public void displayMarkerFeatureMenu(boolean display) {
         if (display) {
             findViewById(R.id.marker_feature_menu).setVisibility(View.VISIBLE);
         } else {
@@ -376,8 +278,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initUIViews() {
-        initMapRelatedElement();
-
         btnSearch = findViewById(R.id.btn_main_poisearch);
         editTextPois = findViewById(R.id.edittext_main_poisearch);
         currentPosition = findViewById(R.id.textview_balloon_poiname);
@@ -391,11 +291,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d("pandia", "departure btn");
                 displayMarkerFeatureMenu(false);
-                if (currentLatLng != null) {
-                    departurePosition = new LatLng(currentLatLng.toLocation());
+                if (mMapElementDisplayer.getCurrentLatLng() != null) {
+                    mMapElementDisplayer.setDeparturePosition(new LatLng(mMapElementDisplayer.getCurrentLatLng().toLocation()));
                 }
-                routePlanner.planRoute(departurePosition, destinationPosition, allWaypoints.toArray(new LatLng[0]));
-                updateMarkers();
+                routePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
+                                        mMapElementDisplayer.getDestinationPosition(),
+                                        mMapElementDisplayer.getAllWaypoints().toArray(new LatLng[0]));
+                mMapElementDisplayer.updateMarkers();
             }
         });
 
@@ -404,11 +306,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d("pandia", "destination btn");
                 displayMarkerFeatureMenu(false);
-                if (currentLatLng != null) {
-                    destinationPosition = new LatLng(currentLatLng.toLocation());
+                if (mMapElementDisplayer.getCurrentLatLng() != null) {
+                    mMapElementDisplayer.setDestinationPosition(new LatLng(mMapElementDisplayer.getCurrentLatLng().toLocation()));
                 }
-                routePlanner.planRoute(departurePosition, destinationPosition, allWaypoints.toArray(new LatLng[0]));
-                updateMarkers();
+                routePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
+                                        mMapElementDisplayer.getDestinationPosition(),
+                                        mMapElementDisplayer.getAllWaypoints().toArray(new LatLng[0]));
+                mMapElementDisplayer.updateMarkers();
             }
         });
 
@@ -417,9 +321,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d("pandia", "clear btn");
                 displayMarkerFeatureMenu(false);
-                routePlanner.planRoute(departurePosition, destinationPosition, null);
-                allWaypoints.clear();
-                updateMarkers();
+                routePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
+                                        mMapElementDisplayer.getDestinationPosition(), null);
+                mMapElementDisplayer.clearWaypoints();
+                mMapElementDisplayer.updateMarkers();
             }
         });
 
@@ -428,20 +333,15 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d("pandia", "add btn");
                 displayMarkerFeatureMenu(false);
-                if (currentLatLng != null) {
-                    allWaypoints.add(new LatLng(currentLatLng.toLocation()));
+                if (mMapElementDisplayer.getCurrentLatLng() != null) {
+                    mMapElementDisplayer.addWaypoint(new LatLng(mMapElementDisplayer.getCurrentLatLng().toLocation()));
                 }
-                routePlanner.planRoute(departurePosition, destinationPosition, allWaypoints.toArray(new LatLng[0]));
-                updateMarkers();
+                routePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
+                                        mMapElementDisplayer.getDestinationPosition(),
+                                        mMapElementDisplayer.getAllWaypoints().toArray(new LatLng[0]));
+                mMapElementDisplayer.updateMarkers();
             }
         });
-    }
-
-    private void initMapRelatedElement() {
-        departureIcon = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_map_route_departure);
-        destinationIcon = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_map_route_destination);
-        waypointIcon = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_map_traffic_danger_midgrey_small);
-        iconMarkLocation = Icon.Factory.fromResources(MainActivity.this, R.drawable.ic_markedlocation);
     }
 
     private void initTomTomServices() {
@@ -452,22 +352,12 @@ public class MainActivity extends AppCompatActivity {
 
     private RoutingApi routingApi;
     private SearchApi searchApi;
-    private LatLng departurePosition;
-    private LatLng destinationPosition;
-    private Icon departureIcon;
-    private Icon destinationIcon;
-    private Icon waypointIcon;
-    private Icon iconMarkLocation;
     private TextView currentPosition;
-    private LatLng currentLatLng;
     private Button departureBtn;
     private Button destinationBtn;
     private Button addWaypointBtn;
     private Button clearWaypointBtn;
-    private Route route;
-    private ArrayList<LatLng> allWaypoints = new ArrayList<LatLng>();
     private RoutePlanner routePlanner;
-    static final private String MARK_LOCATION_TAG = "mark_location_tag";
 
     public class BootcampBroadcastReceiver extends BroadcastReceiver {
         static private final String TAG = "BootcampBroadcast";
