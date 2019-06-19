@@ -28,7 +28,6 @@ public class RoutePlanner {
     public RoutePlanner(TomtomMap tomtomMap, RoutingApi routingApi,
                         IMapElementDisplay mapElementDisplay, IPOIWithTravelTimeResult poiWithTravelTimeResult)
     {
-        this.tomtomMap = tomtomMap;
         this.routingApi = routingApi;
         this.mapElementDisplay = mapElementDisplay;
         this.poiWithTravelTimeResult = poiWithTravelTimeResult;
@@ -37,7 +36,6 @@ public class RoutePlanner {
     public void planRoute(LatLng start, LatLng end, LatLng[] waypoints) {
         ArrayList<POIWithTravelTime> result = new ArrayList<POIWithTravelTime>();
         if (start != null && end != null) {
-            tomtomMap.clearRoute();
             RouteQuery routeQuery = createRouteQuery(start, end, waypoints);
             routingApi.planRoute(routeQuery)
                     .subscribeOn(Schedulers.io())
@@ -84,8 +82,6 @@ public class RoutePlanner {
                         .withInstructionsType(InstructionsType.TAGGED).build();
     }
 
-
-    private TomtomMap tomtomMap;
     private RoutingApi routingApi;
     private IMapElementDisplay mapElementDisplay;
     private IPOIWithTravelTimeResult poiWithTravelTimeResult;
