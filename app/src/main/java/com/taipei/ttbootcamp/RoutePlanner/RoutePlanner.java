@@ -42,7 +42,9 @@ public class RoutePlanner {
                     .subscribe(new DisposableSingleObserver<RouteResponse>() {
                         @Override
                         public void onSuccess(RouteResponse routeResult) {
-                            mapElementDisplay.displayRoutes(routeResult.getRoutes());
+                            if (mapElementDisplay != null) {
+                                mapElementDisplay.displayRoutes(routeResult.getRoutes());
+                            }
                             for (FullRoute route: routeResult.getRoutes())
                             {
                                 FuzzySearchResult fuzzySearchResult = new FuzzySearchResult();
@@ -59,7 +61,9 @@ public class RoutePlanner {
                                         lastTravelTime = instruction.getTravelTimeInSeconds();
                                     }
                                 }
-                                poiWithTravelTimeResult.onPOIWithTravelTimeResult(result);
+                                if (poiWithTravelTimeResult != null) {
+                                    poiWithTravelTimeResult.onPOIWithTravelTimeResult(result);
+                                }
                                 break;
                             }
                         }
