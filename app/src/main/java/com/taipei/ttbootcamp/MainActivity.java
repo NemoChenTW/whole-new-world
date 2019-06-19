@@ -1,5 +1,9 @@
 package com.taipei.ttbootcamp;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
@@ -16,6 +20,7 @@ import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
 import com.taipei.ttbootcamp.implement.MapElementDisplayer;
 import com.taipei.ttbootcamp.interfaces.IPOIWithTravelTimeResult;
 import com.taipei.ttbootcamp.interfaces.POIWithTravelTime;
+import com.taipei.ttbootcamp.ttsengine.TTSEngine;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.map.Icon;
 import com.tomtom.online.sdk.map.MapFragment;
@@ -42,6 +47,7 @@ import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
@@ -58,6 +64,9 @@ public class MainActivity extends AppCompatActivity {
     // UI items
     private ImageButton btnSearch;
     private EditText editTextPois;
+    private TTSEngine mTTSEngine;
+
+    private BootcampBroadcastReceiver bootcampBroadcastReceiver = new BootcampBroadcastReceiver();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +81,21 @@ public class MainActivity extends AppCompatActivity {
 
         View.OnClickListener searchButtonListener = getSearchButtonListener();
         btnSearch.setOnClickListener(searchButtonListener);
+
+        // Create TTS engine
+        mTTSEngine = new TTSEngine(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(bootcampBroadcastReceiver, new IntentFilter(BootcampBroadcastReceiver.ACTION));
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(bootcampBroadcastReceiver);
+        super.onPause();
     }
 
     private View.OnClickListener getSearchButtonListener() {
@@ -385,4 +409,44 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<LatLng> allWaypoints = new ArrayList<LatLng>();
     private RoutePlanner routePlanner;
     static final private String MARK_LOCATION_TAG = "mark_location_tag";
+
+    public class BootcampBroadcastReceiver extends BroadcastReceiver {
+        static private final String TAG = "BootcampBroadcast";
+
+        static private final String ACTION = "TTS_SPEAK";
+        static private final String EXTRA_SPEAK = "EXTRA_SPEAK";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Receive intent: " + intent);
+            final String action = intent.getAction();
+            if (ACTION.equals(action)) {
+                final String extraSpeak = intent.getStringExtra(EXTRA_SPEAK);
+                Log.d(TAG, "extra= " + extraSpeak);
+
+                if (mTTSEngine != null) {
+                    mTTSEngine.speak(getSpeakString(extraSpeak), Locale.ENGLISH);
+                } else {
+                    Log.d(TAG, "mTTSEngine is null ");
+                }
+            }
+        }
+
+        private String getSpeakString(final String extraSpeak) {
+            switch (extraSpeak.toUpperCase()) {
+                case "HELLO":
+                    return "Morning Nick, " + getResources().getString(R.string.greeting_string);
+                case "KIND":
+                    return "Then, " + getResources().getString(R.string.ask_category_string);
+                case "RECOMMEND":
+                    return getResources().getString(R.string.provide_recommend_string);
+                case "TRASH":
+                    return getResources().getString(R.string.trash_trip_string);
+                case "DOG":
+                    return getResources().getString(R.string.dogs_out_string);
+                default:
+                    return "";
+            }
+        }
+    }
 }
