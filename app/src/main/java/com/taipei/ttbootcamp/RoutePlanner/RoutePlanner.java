@@ -25,8 +25,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class RoutePlanner {
 
-    public RoutePlanner(TomtomMap tomtomMap, RoutingApi routingApi,
-                        IMapElementDisplay mapElementDisplay, IPOIWithTravelTimeResult poiWithTravelTimeResult)
+    public RoutePlanner(RoutingApi routingApi, IMapElementDisplay mapElementDisplay, IPOIWithTravelTimeResult poiWithTravelTimeResult)
     {
         this.routingApi = routingApi;
         this.mapElementDisplay = mapElementDisplay;

@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                     //tomtomMap.getMarkerSettings().setMarkerBalloonViewAdapter(createCustomViewAdapter());
 
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), tomtomMap);
-                    routePlanner = new RoutePlanner(tomtomMap, routingApi, mMapElementDisplayer, new IPOIWithTravelTimeResult() {
+                    routePlanner = new RoutePlanner(routingApi, mMapElementDisplayer, new IPOIWithTravelTimeResult() {
                         @Override
                         public void onPOIWithTravelTimeResult(ArrayList<POIWithTravelTime> result) {
 
