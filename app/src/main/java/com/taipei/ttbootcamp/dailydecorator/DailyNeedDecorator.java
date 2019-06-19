@@ -2,10 +2,13 @@ package com.taipei.ttbootcamp.dailydecorator;
 
 import android.util.Log;
 
+import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
 import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
 import com.taipei.ttbootcamp.interfaces.IPOIWithTravelTimeResult;
 import com.taipei.ttbootcamp.interfaces.POIWithTravelTime;
 import com.taipei.ttbootcamp.poigenerator.POIGenerator;
+import com.tomtom.online.sdk.common.location.LatLng;
+import com.tomtom.online.sdk.routing.RoutingApi;
 import com.tomtom.online.sdk.search.SearchApi;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
@@ -16,20 +19,140 @@ import java.util.Date;
 public class DailyNeedDecorator {
 
     private static final int DEFAULT_VISIT_TIME_IN_SECOND = 3600; // one hour
-    private static final int DEFAULT_RESTAURANT_RADIUS = 10;
-    private static final int DEFAULT_HOTEL_RADIUS = 30;
+    private static final int DEFAULT_RESTAURANT_RADIUS = 30000;
+    private static final int DEFAULT_HOTEL_RADIUS = 30000;
+    private static final int DEFAULT_EXPECTED_TRAVEL_TIME = 1800;  // 30 mins
+    private static final int LUNCH_FLAG = -1;
+    private static final int DINNER_FLAG = -2;
 
+    private boolean isAddBreakfast = false;
+    private boolean isAddLunch = false;
+    private boolean isAddDinner = false;
+    private int accumSecondNow = 0;
+    private IPOIWithTravelTimeResult resultCallback;
+    private SearchApi searchApi;
+    private RoutingApi routingApi;
+    private ArrayList<POIWithTravelTime> proposedTrip;
 
-    public static ArrayList<POIWithTravelTime> generateDailyNeed(ArrayList<POIWithTravelTime> tripDraft,
-                                                                 SearchApi searchApi, IPOIWithTravelTimeResult resultCallback) {
-        ArrayList<POIWithTravelTime> proposedTrip = new ArrayList<POIWithTravelTime>();
-        addRestaurants(tripDraft, searchApi, proposedTrip, resultCallback);
-        addHotel(searchApi, proposedTrip);
-        return proposedTrip;
+    public DailyNeedDecorator(RoutingApi routingApi, SearchApi searchApi, IPOIWithTravelTimeResult resultCallback) {
+        this.routingApi = routingApi;
+        this.searchApi = searchApi;
+        this.resultCallback = resultCallback;
+        proposedTrip = new ArrayList<POIWithTravelTime>();
     }
 
-    private static void addRestaurants(ArrayList<POIWithTravelTime> tripDraft, SearchApi searchApi,
-                                       ArrayList<POIWithTravelTime> proposedTrip, IPOIWithTravelTimeResult resultCallback) {
+
+    public void generateDailyNeed(ArrayList<POIWithTravelTime> tripDraft) {
+        proposedTrip.clear();
+        findRestaurantIndex(tripDraft);
+        findLunchRestaurant();
+        //addHotel(searchApi, proposedTrip);
+        //return proposedTrip;
+    }
+
+    private void findLunchRestaurant() {
+        if (isAddLunch) {
+            int index = findRestaurantFlag(proposedTrip, LUNCH_FLAG);
+
+            if (index >= 0) {
+                POIGenerator.getPOIsWithType(searchApi, proposedTrip.get(index - 1).result.getPosition(),
+                        POIGenerator.POITYPE.FOOD, DEFAULT_RESTAURANT_RADIUS, new IPOISearchResult() {
+                            @Override
+                            public void onPOISearchResult(ArrayList<FuzzySearchResult> searchResult) {
+                                if (!searchResult.isEmpty()) {
+                                    int index = findRestaurantFlag(proposedTrip, LUNCH_FLAG);
+                                    proposedTrip.get(findRestaurantFlag(proposedTrip, LUNCH_FLAG)).result = searchResult.get(0);
+                                    //proposedTrip.remove(index);
+                                    //proposedTrip.add(index, new POIWithTravelTime(searchResult.get(0), LUNCH_FLAG));
+                                    findLunchTravelTime(searchResult.get(0));
+                                }
+                                else {
+                                    Log.d("DailySupply", "Not found lunch");
+                                    findDinnerRestaurant();
+                                }
+                            }
+                        });
+            }
+        }
+        else {
+            findDinnerRestaurant();
+        }
+    }
+
+    private int findRestaurantFlag(ArrayList<POIWithTravelTime> tripDraft, int flag) {
+        int index = -1;
+        for (int i = 0; i < tripDraft.size(); ++i) {
+            if (tripDraft.get(i).travelTime == flag) {
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    private void findLunchTravelTime(FuzzySearchResult restaurant) {
+        int prev = findRestaurantFlag(proposedTrip, LUNCH_FLAG) - 1;
+        RoutePlanner routePlanner = new RoutePlanner(routingApi, null, new IPOIWithTravelTimeResult() {
+            @Override
+            public void onPOIWithTravelTimeResult(ArrayList<POIWithTravelTime> result) {
+                if (result.size() == 2) {
+                    int index = findRestaurantFlag(proposedTrip, LUNCH_FLAG);
+                    proposedTrip.get(index).travelTime = result.get(1).travelTime;
+                    findDinnerRestaurant();
+                }
+            }
+        });
+        routePlanner.planRoute(proposedTrip.get(prev).result.getPosition(), restaurant.getPosition(), null);
+    }
+
+    private void findDinnerRestaurant() {
+        if (isAddDinner) {
+            int index = findRestaurantFlag(proposedTrip, DINNER_FLAG);
+
+            if (index >= 0) {
+                POIGenerator.getPOIsWithType(searchApi, proposedTrip.get(index - 1).result.getPosition(),
+                        POIGenerator.POITYPE.FOOD, DEFAULT_RESTAURANT_RADIUS, new IPOISearchResult() {
+                            @Override
+                            public void onPOISearchResult(ArrayList<FuzzySearchResult> searchResult) {
+                                if (!searchResult.isEmpty()) {
+                                    int index = findRestaurantFlag(proposedTrip, DINNER_FLAG);
+                                    proposedTrip.get(findRestaurantFlag(proposedTrip, DINNER_FLAG)).result = searchResult.get(0);
+                                    //proposedTrip.remove(index);
+                                    //proposedTrip.add(index, new POIWithTravelTime(searchResult.get(0), DINNER_FLAG));
+                                    findDinnerTravelTime(searchResult.get(0));
+                                }
+                                else {
+                                    Log.d("DailySupply", "Not found dinner");
+                                    addHotel();
+                                }
+                            }
+                        });
+            }
+        }
+        else {
+            addHotel();
+        }
+    }
+
+    private void findDinnerTravelTime(FuzzySearchResult restaurant) {
+        int prev = findRestaurantFlag(proposedTrip, DINNER_FLAG) - 1;
+        RoutePlanner routePlanner = new RoutePlanner(routingApi, null, new IPOIWithTravelTimeResult() {
+            @Override
+            public void onPOIWithTravelTimeResult(ArrayList<POIWithTravelTime> result) {
+                if (result.size() == 2) {
+                    int index = findRestaurantFlag(proposedTrip, DINNER_FLAG);
+                    proposedTrip.get(index).travelTime = result.get(1).travelTime;
+                    addHotel();
+                }
+            }
+        });
+        routePlanner.planRoute(proposedTrip.get(prev).result.getPosition(), restaurant.getPosition(), null);
+    }
+
+    private void doneFinding() {
+        resultCallback.onPOIWithTravelTimeResult(proposedTrip);
+    }
+
+    private void findRestaurantIndex(ArrayList<POIWithTravelTime> tripDraft) {
         Calendar rightNow = Calendar.getInstance();
         //int hour = rightNow.get(Calendar.HOUR_OF_DAY);
         //int minute = rightNow.get(Calendar.MINUTE);
@@ -37,10 +160,8 @@ public class DailyNeedDecorator {
         int hour = 9;
         int minute = 0;
         int second = 0;
-        int accumSecondNow = second + minute * 60 + hour * 3600;
-        boolean isAddBreakfast = false;
-        boolean isAddLunch = false;
-        boolean isAddDinner = false;
+        accumSecondNow = second + minute * 60 + hour * 3600;
+
 
         for (POIWithTravelTime tripItem : tripDraft) {
             boolean canEatBeforeThisTrip = isEatingTime(accumSecondNow);
@@ -54,23 +175,19 @@ public class DailyNeedDecorator {
                     + " isAddLunch: " + isAddLunch + " isAddDinner: " + isAddDinner + " shouldCont: " + shouldContinue);
 
             if (!shouldContinue) {
-                POIWithTravelTime restaurantPoint = new POIWithTravelTime(new FuzzySearchResult(), 13*60);
+                POIWithTravelTime restaurantPoint = new POIWithTravelTime(new FuzzySearchResult(), LUNCH_FLAG);
+                if (!isAddLunch) {
+                    isAddLunch = isNoon(accumSecondNow);
+                }
+                if (!isAddDinner) {
+                    isAddDinner = isEvening(accumSecondNow);
+                }
+                accumSecondNow += DEFAULT_EXPECTED_TRAVEL_TIME + DEFAULT_VISIT_TIME_IN_SECOND;
 
-                //TODO callback restaurant and add to list.
-                POIGenerator.getPOIsWithType(searchApi, tripItem.result.getPosition(), POIGenerator.POITYPE.FOOD, DEFAULT_RESTAURANT_RADIUS,
-                        new IPOISearchResult() {
-                            @Override
-                            public void onPOISearchResult(ArrayList<FuzzySearchResult> searchResult) {
-                                if (!searchResult.isEmpty()) {
+                if (isAddDinner) {
+                    restaurantPoint.travelTime = DINNER_FLAG;
+                }
 
-                                }
-                            }
-                        }
-                );
-
-                isAddLunch = isNoon(accumSecondNow);
-                isAddDinner = isEvening(accumSecondNow);
-                accumSecondNow += restaurantPoint.travelTime + DEFAULT_VISIT_TIME_IN_SECOND;
                 proposedTrip.add(restaurantPoint);
             }
 
@@ -79,16 +196,35 @@ public class DailyNeedDecorator {
         }
     }
 
-    private static void addHotel(SearchApi searchApi, ArrayList<POIWithTravelTime> proposedTrip) {
+    private void addHotel() {
         POIWithTravelTime hotelPoint = new POIWithTravelTime(new FuzzySearchResult(), 12*60);
 
-        //TODO callback restaurant and add to list.
-        //POIGenerator.getPOIsWithType(searchApi, tripItem.reqult.getPosition(), POIGenerator.POITYPE.HOTEL, DEFAULT_HOTEL_RADIUS);
-
-        proposedTrip.add(hotelPoint);
+        POIGenerator.getPOIsWithType(searchApi, proposedTrip.get(proposedTrip.size() - 1).result.getPosition(),
+                POIGenerator.POITYPE.HOTEL, DEFAULT_HOTEL_RADIUS, new IPOISearchResult() {
+                    @Override
+                    public void onPOISearchResult(ArrayList<FuzzySearchResult> searchResult) {
+                        if (!searchResult.isEmpty()) {
+                            proposedTrip.add(new POIWithTravelTime(searchResult.get(0), 0));
+                            findHotelTravelTime(searchResult.get(0));
+                        }
+                    }
+                });
     }
 
-    private static boolean betterEatNow(boolean canEatBeforeThisTrip, boolean canEatAfterThisTrip) {
+    private void findHotelTravelTime(FuzzySearchResult hotel) {
+        RoutePlanner routePlanner = new RoutePlanner(routingApi, null, new IPOIWithTravelTimeResult() {
+            @Override
+            public void onPOIWithTravelTimeResult(ArrayList<POIWithTravelTime> result) {
+                if (result.size() == 2) {
+                    proposedTrip.get(proposedTrip.size() - 1).travelTime = result.get(1).travelTime;
+                    doneFinding();
+                }
+            }
+        });
+        routePlanner.planRoute(proposedTrip.get(proposedTrip.size() - 1).result.getPosition(), hotel.getPosition(), null);
+    }
+
+    private boolean betterEatNow(boolean canEatBeforeThisTrip, boolean canEatAfterThisTrip) {
         // simplify later
         if (!canEatBeforeThisTrip && !canEatAfterThisTrip) {
             return false;
@@ -104,15 +240,15 @@ public class DailyNeedDecorator {
         }
     }
 
-    private static boolean isNoon(int secondOfDay) {
+    private boolean isNoon(int secondOfDay) {
         return (secondOfDay >= 11 * 3600 && secondOfDay <= 13 * 3600);
     }
 
-    private static boolean isEvening(int secondOfDay) {
+    private boolean isEvening(int secondOfDay) {
         return (secondOfDay >= 18 * 3600 && secondOfDay <= 20 * 3600);
     }
 
-    private static boolean isEatingTime(int secondOfDay) {
+    private boolean isEatingTime(int secondOfDay) {
         return isNoon(secondOfDay) || isEvening(secondOfDay);
     }
 }
