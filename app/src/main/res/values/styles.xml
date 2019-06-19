@@ -9,12 +9,16 @@
     </style>
 
     <style name="POIButtonStyle">
+        <item name="android:background">@drawable/bg_balloon_button</item>
         <item name="android:layout_marginTop">@dimen/spacing_small</item>
         <!--<item name="android:layout_marginBottom">@dimen/spacing_small</item>-->
         <item name="android:layout_marginStart">@dimen/spacing_xtiny</item>
         <item name="android:layout_marginEnd">@dimen/spacing_xtiny</item>
         <item name="android:paddingStart">@dimen/spacing_xsmall</item>
         <item name="android:paddingEnd">@dimen/spacing_xsmall</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:textAlignment">center</item>
     </style>
 
 
