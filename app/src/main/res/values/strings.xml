@@ -11,4 +11,10 @@
     <string name="poi_name_key">poiName</string>
     <string name="address_key">address</string>
     <string name="geocode_no_results">No geocoder results. Choose different location and try again.</string>
+    <string name="greeting_string">How do you feel today?</string>
+    <string name="ask_category_string">What kind of trip you prefer?</string>
+    <string name="provide_recommend_string">Here is the recommend trip for you.</string>
+    <string name="trash_trip_string">OK, I will take you to Vladivostok.</string>
+    <string name="dogs_out_string">Woof, woof, woof, woof, woof.</string>
+
 </resources>
