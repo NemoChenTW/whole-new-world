@@ -9,10 +9,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.google.common.base.Optional;
@@ -60,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
     private TomtomMap tomtomMap;
 
     private MapElementDisplayer mMapElementDisplayer;
+    private PopupWindow popupWindow;
+    private View rootView;
 
     // UI items
     private ImageButton btnSearch;
@@ -73,6 +78,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        rootView = findViewById(android.R.id.content);
+
         MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         mapFragment.getAsyncMap(onMapReadyCallback);
 
@@ -82,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
         View.OnClickListener searchButtonListener = getSearchButtonListener();
         btnSearch.setOnClickListener(searchButtonListener);
 
+        initPopup();
         // Create TTS engine
         mTTSEngine = new TTSEngine(this);
     }
@@ -96,6 +104,44 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         unregisterReceiver(bootcampBroadcastReceiver);
         super.onPause();
+    }
+
+    private Button testButton;
+    private void initPopup() {
+        testButton = findViewById(R.id.test_button);
+        testButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopup();
+            }
+        });
+    }
+    private void showPopup() {
+        if (popupWindow == null) {
+            View view = LayoutInflater.from(this).inflate(R.layout.popup_window,null);
+            popupWindow = new PopupWindow(this, null, R.style.Transparent_Dialog);
+            popupWindow.setContentView(view);
+
+            popupWindow.setOutsideTouchable(true);
+            popupWindow.setAnimationStyle(R.style.anim_menu_bottombar);
+
+
+            ((Button)view.findViewById(R.id.feeling_button_1)).setText("Museum");
+            ((Button)view.findViewById(R.id.feeling_button_2)).setText("Coffee");
+            ((Button)view.findViewById(R.id.feeling_button_3)).setText("Drinks");
+            ((Button)view.findViewById(R.id.feeling_button_4)).setText("Don't want to go home");
+
+            ArrayList<Button> buttonList = new ArrayList<>();
+            buttonList.add(view.findViewById(R.id.feeling_button_1));
+            buttonList.add(view.findViewById(R.id.feeling_button_2));
+            buttonList.add(view.findViewById(R.id.feeling_button_3));
+            buttonList.add(view.findViewById(R.id.feeling_button_4));
+
+            for (Button button : buttonList) {
+                button.setOnClickListener(view1 -> popupWindow.dismiss());
+            }
+        }
+        popupWindow.showAtLocation(rootView, Gravity.CENTER_VERTICAL | Gravity.LEFT,0, 40);
     }
 
     private View.OnClickListener getSearchButtonListener() {
@@ -428,6 +474,9 @@ public class MainActivity extends AppCompatActivity {
                     mTTSEngine.speak(getSpeakString(extraSpeak), Locale.ENGLISH);
                 } else {
                     Log.d(TAG, "mTTSEngine is null ");
+                }
+                if ("KIND".equals(extraSpeak.toUpperCase())) {
+                    showPopup();
                 }
             }
         }

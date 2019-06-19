@@ -63,6 +63,15 @@
             android:layout_height="wrap_content"
             android:text="@string/clean_waypoint" />
 
+        <Button
+            style="@style/POIButtonStyle"
+            android:id="@+id/test_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_balloon_destination"
+            android:layout_toEndOf="@id/btn_balloon_clearwaypoint"
+            android:text="Test Popup"
+            />
     </RelativeLayout>
 
 </RelativeLayout>
