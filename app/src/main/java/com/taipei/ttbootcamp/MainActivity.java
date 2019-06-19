@@ -235,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleLongClick(@NonNull LatLng latLng) {
+        displayMarkerFeatureMenu(true);
         updateMarkLocation(latLng);
         currentLatLng = latLng;
     }
@@ -366,6 +367,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void displayMarkerFeatureMenu(boolean display) {
+        if (display) {
+            findViewById(R.id.marker_feature_menu).setVisibility(View.VISIBLE);
+        } else {
+            findViewById(R.id.marker_feature_menu).setVisibility(View.GONE);
+        }
+    }
+
     private void initUIViews() {
         initMapRelatedElement();
 
@@ -381,6 +390,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d("pandia", "departure btn");
+                displayMarkerFeatureMenu(false);
                 if (currentLatLng != null) {
                     departurePosition = new LatLng(currentLatLng.toLocation());
                 }
@@ -393,6 +403,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d("pandia", "destination btn");
+                displayMarkerFeatureMenu(false);
                 if (currentLatLng != null) {
                     destinationPosition = new LatLng(currentLatLng.toLocation());
                 }
@@ -405,6 +416,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d("pandia", "clear btn");
+                displayMarkerFeatureMenu(false);
                 routePlanner.planRoute(departurePosition, destinationPosition, null);
                 allWaypoints.clear();
                 updateMarkers();
@@ -415,6 +427,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d("pandia", "add btn");
+                displayMarkerFeatureMenu(false);
                 if (currentLatLng != null) {
                     allWaypoints.add(new LatLng(currentLatLng.toLocation()));
                 }

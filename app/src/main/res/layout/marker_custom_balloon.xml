@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/marker_feature_menu"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@android:color/transparent"
-    android:layout_marginTop="@dimen/spacing_xtiny"
-    >
+    android:layout_marginTop="@dimen/spacing_xtiny">
 
     <RelativeLayout
         android:id="@+id/relative_text_layout"

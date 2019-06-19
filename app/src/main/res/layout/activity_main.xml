@@ -9,7 +9,7 @@
         android:layout_height="match_parent">
 
         <include layout="@layout/content_main" />
-        <include layout="@layout/marker_custom_balloon" />
+        <include layout="@layout/marker_custom_balloon" android:visibility="gone"/>
 
     </FrameLayout>
 
