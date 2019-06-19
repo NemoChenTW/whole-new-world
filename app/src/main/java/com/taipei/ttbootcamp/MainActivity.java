@@ -18,14 +18,15 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
+import com.taipei.ttbootcamp.controller.Controller;
 import com.taipei.ttbootcamp.implement.MapElementDisplayer;
 import com.taipei.ttbootcamp.interfaces.IPOIWithTravelTimeResult;
 import com.taipei.ttbootcamp.interfaces.POIWithTravelTime;
+import com.taipei.ttbootcamp.poigenerator.POIGenerator;
 import com.taipei.ttbootcamp.ttsengine.TTSEngine;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.map.MapFragment;
 import com.tomtom.online.sdk.map.OnMapReadyCallback;
-import com.tomtom.online.sdk.map.Route;
 import com.tomtom.online.sdk.map.TomtomMap;
 import com.tomtom.online.sdk.map.TomtomMapCallback;
 import com.tomtom.online.sdk.routing.OnlineRoutingApi;
@@ -206,6 +207,8 @@ public class MainActivity extends AppCompatActivity {
 
                         }
                     });
+                    controller = new Controller(routingApi, searchApi, mMapElementDisplayer);
+                    controller.PlanTrip(new LatLng(25.046570, 121.515313), POIGenerator.POITYPE.MUSEUM, 100000);
                 }
             };
 
@@ -358,6 +361,7 @@ public class MainActivity extends AppCompatActivity {
     private Button addWaypointBtn;
     private Button clearWaypointBtn;
     private RoutePlanner routePlanner;
+    private Controller controller;
 
     public class BootcampBroadcastReceiver extends BroadcastReceiver {
         static private final String TAG = "BootcampBroadcast";

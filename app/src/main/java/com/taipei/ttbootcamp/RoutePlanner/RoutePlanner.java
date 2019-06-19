@@ -32,6 +32,16 @@ public class RoutePlanner {
         this.poiWithTravelTimeResult = poiWithTravelTimeResult;
     }
 
+    public void planRoute(LatLng start, LatLng end, ArrayList<FuzzySearchResult> fuzzySearchResults, int i) {
+        this.mFuzzySearchResults = new ArrayList<FuzzySearchResult>(fuzzySearchResults);
+        ArrayList<LatLng> waypoints = new ArrayList<LatLng>();
+        for (FuzzySearchResult fresult : mFuzzySearchResults) {
+            waypoints.add(fresult.getPosition());
+        }
+        waypoints.remove(waypoints.size() - 1);
+        planRoute(start, end, waypoints.toArray(new LatLng[0]));
+    }
+
     public void planRoute(LatLng start, LatLng end, LatLng[] waypoints) {
         ArrayList<POIWithTravelTime> result = new ArrayList<POIWithTravelTime>();
         if (start != null && end != null) {
@@ -50,15 +60,23 @@ public class RoutePlanner {
                                 FuzzySearchResult fuzzySearchResult = new FuzzySearchResult();
                                 POIWithTravelTime poiWithTravelTime = new POIWithTravelTime(fuzzySearchResult, 0);
                                 result.add(poiWithTravelTime);
-                                Integer lastTravelTime = 0;
+                                int lastTravelTime = 0;
+                                int fuzzySearchResultIndex = 0;
+
                                 for (Instruction instruction : route.getGuidance().getInstructions())
                                 {
                                     if (instruction.getInstructionType().equals("LOCATION_WAYPOINT") ||
                                             instruction.getInstructionType().equals("LOCATION_ARRIVAL"))
                                     {
                                         Log.d("Nick", "Found waypoint or arrival! Time: " + instruction.getTravelTimeInSeconds() + " interval: " + (instruction.getTravelTimeInSeconds() - lastTravelTime));
-                                        result.add(new POIWithTravelTime(fuzzySearchResult, instruction.getTravelTimeInSeconds() - lastTravelTime));
+                                        if (mFuzzySearchResults == null) {
+                                            result.add(new POIWithTravelTime(mFuzzySearchResults.get(fuzzySearchResultIndex), instruction.getTravelTimeInSeconds() - lastTravelTime));
+
+                                        } else {
+                                            result.add(new POIWithTravelTime(new FuzzySearchResult(), instruction.getTravelTimeInSeconds() - lastTravelTime));
+                                        }
                                         lastTravelTime = instruction.getTravelTimeInSeconds();
+                                        fuzzySearchResultIndex++;
                                     }
                                 }
                                 if (poiWithTravelTimeResult != null) {
@@ -88,4 +106,5 @@ public class RoutePlanner {
     private RoutingApi routingApi;
     private IMapElementDisplay mapElementDisplay;
     private IPOIWithTravelTimeResult poiWithTravelTimeResult;
+    private ArrayList<FuzzySearchResult> mFuzzySearchResults;
 }

@@ -1,6 +1,7 @@
 package com.taipei.ttbootcamp.controller;
 
 import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
+import com.taipei.ttbootcamp.dailydecorator.DailyNeedDecorator;
 import com.taipei.ttbootcamp.interfaces.IMapElementDisplay;
 import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
 import com.taipei.ttbootcamp.interfaces.IPOIWithTravelTimeResult;
@@ -17,15 +18,24 @@ import java.util.ArrayList;
 public class Controller implements IPOISearchResult {
 
     private RoutingApi routingApi;
+    private SearchApi searchApi;
     private IMapElementDisplay mapElementDisplay;
     private LatLng currentPosition;
     private RoutePlanner routePlanner;
+    private DailyNeedDecorator dailyNeedDecorator;
 
-    public Controller(RoutingApi routingApi, IMapElementDisplay mapElementDisplay)
+    public Controller(RoutingApi routingApi, SearchApi searchApi, IMapElementDisplay mapElementDisplay)
     {
         this.routingApi = routingApi;
+        this.searchApi = searchApi;
         this.mapElementDisplay = mapElementDisplay;
         routePlanner = new RoutePlanner(routingApi, mapElementDisplay, new IPOIWithTravelTimeResult() {
+            @Override
+            public void onPOIWithTravelTimeResult(ArrayList<POIWithTravelTime> result) {
+                dailyNeedDecorator.generateDailyNeed(result);
+            }
+        });
+        dailyNeedDecorator = new DailyNeedDecorator(routingApi, searchApi, new IPOIWithTravelTimeResult() {
             @Override
             public void onPOIWithTravelTimeResult(ArrayList<POIWithTravelTime> result) {
 
@@ -36,18 +46,13 @@ public class Controller implements IPOISearchResult {
     @Override
     public void onPOISearchResult(ArrayList<FuzzySearchResult> searchResult) {
         LatLng destination = new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation());
-        searchResult.remove(searchResult.size() - 1);
-        ArrayList<LatLng> waypoints = new ArrayList<LatLng>();
-        for (FuzzySearchResult fresult : searchResult) {
-            waypoints.add(fresult.getPosition());
-        }
-        routePlanner.planRoute(currentPosition, destination, waypoints.toArray(new LatLng[0]));
+        routePlanner.planRoute(currentPosition, destination, searchResult, 0);
     }
 
-    public void PlanTrip(SearchApi searchApi, LatLng currentPosition, POIGenerator.POITYPE poitype, int radius)
+    public void PlanTrip(LatLng currentPosition, POIGenerator.POITYPE poitype, int radius)
     {
         this.currentPosition = currentPosition;
-        POIGenerator.getPOIsWithType(searchApi, currentPosition, poitype, radius, this);
+        POIGenerator.getPOIsWithType(searchApi, this.currentPosition, poitype, radius, this);
     }
 
 }
