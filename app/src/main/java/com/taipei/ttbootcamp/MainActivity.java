@@ -14,6 +14,8 @@ import android.widget.TextView;
 import com.google.common.base.Optional;
 import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
 import com.taipei.ttbootcamp.implement.MapElementDisplayer;
+import com.taipei.ttbootcamp.interfaces.IPOIWithTravelTimeResult;
+import com.taipei.ttbootcamp.interfaces.POIWithTravelTime;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.map.Icon;
 import com.tomtom.online.sdk.map.MapFragment;
@@ -131,7 +133,12 @@ public class MainActivity extends AppCompatActivity {
                     //tomtomMap.getMarkerSettings().setMarkerBalloonViewAdapter(createCustomViewAdapter());
 
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), tomtomMap);
-                    routePlanner = new RoutePlanner(tomtomMap, routingApi, mMapElementDisplayer);
+                    routePlanner = new RoutePlanner(tomtomMap, routingApi, mMapElementDisplayer, new IPOIWithTravelTimeResult() {
+                        @Override
+                        public void onPOIWithTravelTimeResult(ArrayList<POIWithTravelTime> result) {
+
+                        }
+                    });
                 }
             };
 

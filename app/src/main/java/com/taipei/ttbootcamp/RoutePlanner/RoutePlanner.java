@@ -3,6 +3,7 @@ package com.taipei.ttbootcamp.RoutePlanner;
 import android.util.Log;
 
 import com.taipei.ttbootcamp.interfaces.IMapElementDisplay;
+import com.taipei.ttbootcamp.interfaces.IPOIWithTravelTimeResult;
 import com.taipei.ttbootcamp.interfaces.POIWithTravelTime;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.map.TomtomMap;
@@ -24,11 +25,13 @@ import io.reactivex.schedulers.Schedulers;
 
 public class RoutePlanner {
 
-    public RoutePlanner(TomtomMap tomtomMap, RoutingApi routingApi, IMapElementDisplay mapElementDisplay)
+    public RoutePlanner(TomtomMap tomtomMap, RoutingApi routingApi,
+                        IMapElementDisplay mapElementDisplay, IPOIWithTravelTimeResult poiWithTravelTimeResult)
     {
         this.tomtomMap = tomtomMap;
         this.routingApi = routingApi;
         this.mapElementDisplay = mapElementDisplay;
+        this.poiWithTravelTimeResult = poiWithTravelTimeResult;
     }
 
     public void planRoute(LatLng start, LatLng end, LatLng[] waypoints) {
@@ -43,24 +46,24 @@ public class RoutePlanner {
                         @Override
                         public void onSuccess(RouteResponse routeResult) {
                             mapElementDisplay.displayRoutes(routeResult.getRoutes());
-                            Log.d("Nick", routeResult.toString());
                             for (FullRoute route: routeResult.getRoutes())
                             {
-                                Log.d("Nick", route.getCoordinates().toString());
+                                FuzzySearchResult fuzzySearchResult = new FuzzySearchResult();
+                                POIWithTravelTime poiWithTravelTime = new POIWithTravelTime(fuzzySearchResult, 0);
+                                result.add(poiWithTravelTime);
+                                Integer lastTravelTime = 0;
                                 for (Instruction instruction : route.getGuidance().getInstructions())
                                 {
-                                    FuzzySearchResult fuzzySearchResult = new FuzzySearchResult();
-                                    POIWithTravelTime poiWithTravelTime = new POIWithTravelTime(fuzzySearchResult, 0);
-                                    poiWithTravelTime.travelTime = 0;
-                                    result.add(poiWithTravelTime);
                                     if (instruction.getInstructionType().equals("LOCATION_WAYPOINT") ||
                                             instruction.getInstructionType().equals("LOCATION_ARRIVAL"))
                                     {
-                                        poiWithTravelTime.travelTime = instruction.getTravelTimeInSeconds();
-                                        result.add(poiWithTravelTime);
-                                        Log.d("Nick", "Found waypoint or arrival! Time: " + instruction.getTravelTimeInSeconds());
+                                        Log.d("Nick", "Found waypoint or arrival! Time: " + instruction.getTravelTimeInSeconds() + " interval: " + (instruction.getTravelTimeInSeconds() - lastTravelTime));
+                                        result.add(new POIWithTravelTime(fuzzySearchResult, instruction.getTravelTimeInSeconds() - lastTravelTime));
+                                        lastTravelTime = instruction.getTravelTimeInSeconds();
                                     }
                                 }
+                                poiWithTravelTimeResult.onPOIWithTravelTimeResult(result);
+                                break;
                             }
                         }
 
@@ -85,4 +88,5 @@ public class RoutePlanner {
     private TomtomMap tomtomMap;
     private RoutingApi routingApi;
     private IMapElementDisplay mapElementDisplay;
+    private IPOIWithTravelTimeResult poiWithTravelTimeResult;
 }
