@@ -7,14 +7,12 @@ import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
 import com.taipei.ttbootcamp.interfaces.IPOIWithTravelTimeResult;
 import com.taipei.ttbootcamp.interfaces.POIWithTravelTime;
 import com.taipei.ttbootcamp.poigenerator.POIGenerator;
-import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.routing.RoutingApi;
 import com.tomtom.online.sdk.search.SearchApi;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 public class DailyNeedDecorator {
 
@@ -91,16 +89,7 @@ public class DailyNeedDecorator {
 
     private void findLunchTravelTime(FuzzySearchResult restaurant) {
         int prev = findRestaurantFlag(proposedTrip, LUNCH_FLAG) - 1;
-        RoutePlanner routePlanner = new RoutePlanner(routingApi, null, new IPOIWithTravelTimeResult() {
-            @Override
-            public void onPOIWithTravelTimeResult(ArrayList<POIWithTravelTime> result) {
-                if (result.size() == 2) {
-                    int index = findRestaurantFlag(proposedTrip, LUNCH_FLAG);
-                    proposedTrip.get(index).travelTime = result.get(1).travelTime;
-                    findDinnerRestaurant();
-                }
-            }
-        });
+        RoutePlanner routePlanner = new RoutePlanner(routingApi, null);
         routePlanner.planRoute(proposedTrip.get(prev).result.getPosition(), restaurant.getPosition(), null);
     }
 
@@ -135,16 +124,7 @@ public class DailyNeedDecorator {
 
     private void findDinnerTravelTime(FuzzySearchResult restaurant) {
         int prev = findRestaurantFlag(proposedTrip, DINNER_FLAG) - 1;
-        RoutePlanner routePlanner = new RoutePlanner(routingApi, null, new IPOIWithTravelTimeResult() {
-            @Override
-            public void onPOIWithTravelTimeResult(ArrayList<POIWithTravelTime> result) {
-                if (result.size() == 2) {
-                    int index = findRestaurantFlag(proposedTrip, DINNER_FLAG);
-                    proposedTrip.get(index).travelTime = result.get(1).travelTime;
-                    addHotel();
-                }
-            }
-        });
+        RoutePlanner routePlanner = new RoutePlanner(routingApi, null);
         routePlanner.planRoute(proposedTrip.get(prev).result.getPosition(), restaurant.getPosition(), null);
     }
 
@@ -212,15 +192,7 @@ public class DailyNeedDecorator {
     }
 
     private void findHotelTravelTime(FuzzySearchResult hotel) {
-        RoutePlanner routePlanner = new RoutePlanner(routingApi, null, new IPOIWithTravelTimeResult() {
-            @Override
-            public void onPOIWithTravelTimeResult(ArrayList<POIWithTravelTime> result) {
-                if (result.size() == 2) {
-                    proposedTrip.get(proposedTrip.size() - 1).travelTime = result.get(1).travelTime;
-                    doneFinding();
-                }
-            }
-        });
+        RoutePlanner routePlanner = new RoutePlanner(routingApi, null);
         routePlanner.planRoute(proposedTrip.get(proposedTrip.size() - 1).result.getPosition(), hotel.getPosition(), null);
     }
 

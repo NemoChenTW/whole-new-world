@@ -20,8 +20,6 @@ import android.widget.TextView;
 import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
 import com.taipei.ttbootcamp.controller.Controller;
 import com.taipei.ttbootcamp.implement.MapElementDisplayer;
-import com.taipei.ttbootcamp.interfaces.IPOIWithTravelTimeResult;
-import com.taipei.ttbootcamp.interfaces.POIWithTravelTime;
 import com.taipei.ttbootcamp.poigenerator.POIGenerator;
 import com.taipei.ttbootcamp.ttsengine.TTSEngine;
 import com.tomtom.online.sdk.common.location.LatLng;
@@ -213,14 +211,9 @@ public class MainActivity extends AppCompatActivity {
 
                     tomtomMap.addOnMapLongClickListener(onMapLongClickListener);
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), tomtomMap);
-                    routePlanner = new RoutePlanner(routingApi, mMapElementDisplayer, new IPOIWithTravelTimeResult() {
-                        @Override
-                        public void onPOIWithTravelTimeResult(ArrayList<POIWithTravelTime> result) {
-
-                        }
-                    });
                     controller = new Controller(routingApi, searchApi, mMapElementDisplayer);
                     controller.PlanTrip(new LatLng(25.046570, 121.515313), POIGenerator.POITYPE.MUSEUM, 100000);
+                    routePlanner = new RoutePlanner(routingApi, controller);
                 }
             };
 
