@@ -28,7 +28,7 @@ public class TripController implements IPOISearchResult, IFirstPlanResultListene
     private IMapElementDisplay mMapElementDisplay;
     private LatLng mCurrentPosition;
     private RoutePlanner mRoutePlanner;
-    private DailyNeedDecorator dailyNeedDecorator;
+    private DailyNeedDecorator mDailyNeedDecorator;
 
     public TripController(RoutingApi routingApi, SearchApi searchApi, IMapElementDisplay mapElementDisplay)
     {
@@ -36,7 +36,7 @@ public class TripController implements IPOISearchResult, IFirstPlanResultListene
         mSearchApi = searchApi;
         mMapElementDisplay = mapElementDisplay;
         mRoutePlanner = new RoutePlanner(mRoutingApi, this);
-        dailyNeedDecorator = new DailyNeedDecorator(mRoutingApi, mSearchApi, new IPOIWithTravelTimeResult() {
+        mDailyNeedDecorator = new DailyNeedDecorator(mRoutingApi, mSearchApi, new IPOIWithTravelTimeResult() {
             @Override
             public void onPOIWithTravelTimeResult(ArrayList<POIWithTravelTime> result) {
 

@@ -18,7 +18,7 @@ import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
 public class POIGenerator {
-    static private final String TAG = "POIGEN";
+    static private final String TAG = "POIGenerator";
 
     public enum POITYPE {
         MUSEUM,

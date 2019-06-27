@@ -51,37 +51,38 @@ public class MainActivity extends AppCompatActivity {
     static private final String TAG = "MainActivity";
 
     // TomTom service
-    private TomtomMap tomtomMap;
-    private RoutingApi routingApi;
-    private SearchApi searchApi;
+    private TomtomMap mTomtomMap;
+    private RoutingApi mRoutingApi;
+    private SearchApi mSearchApi;
 
     private MapElementDisplayer mMapElementDisplayer;
-    private RoutePlanner routePlanner;
-    private TripController tripController;
+    private RoutePlanner mRoutePlanner;
+    private TripController mTripController;
 
     // View
-    private PopupWindow popupWindow;
-    private View rootView;
+    private PopupWindow mPopupWindow;
+    private View mRootView;
 
     // UI items
-    private ImageButton btnSearch;
-    private EditText editTextPois;
+    private ImageButton mBtnSearch;
+    private EditText mEditTextPois;
     private TTSEngine mTTSEngine;
-    private Button departureBtn;
-    private Button destinationBtn;
-    private Button addWaypointBtn;
-    private Button clearWaypointBtn;
+    private Button mDepartureBtn;
+    private Button mDestinationBtn;
+    private Button mAddWaypointBtn;
+    private Button mClearWaypointBtn;
+    private Button mTestButton;
 
-    private TextView currentPosition;
+    private TextView mCurrentPosition;
 
-    private BootcampBroadcastReceiver bootcampBroadcastReceiver = new BootcampBroadcastReceiver();
+    private BootcampBroadcastReceiver mBootcampBroadcastReceiver = new BootcampBroadcastReceiver();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        rootView = findViewById(android.R.id.content);
+        mRootView = findViewById(android.R.id.content);
 
         MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         mapFragment.getAsyncMap(onMapReadyCallback);
@@ -90,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         initTomTomServices();
 
         View.OnClickListener searchButtonListener = getSearchButtonListener();
-        btnSearch.setOnClickListener(searchButtonListener);
+        mBtnSearch.setOnClickListener(searchButtonListener);
 
         initPopup();
         // Create TTS engine
@@ -107,19 +108,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(bootcampBroadcastReceiver, new IntentFilter(BootcampBroadcastReceiver.ACTION));
+        registerReceiver(mBootcampBroadcastReceiver, new IntentFilter(BootcampBroadcastReceiver.ACTION));
     }
 
     @Override
     protected void onPause() {
-        unregisterReceiver(bootcampBroadcastReceiver);
+        unregisterReceiver(mBootcampBroadcastReceiver);
         super.onPause();
     }
 
-    private Button testButton;
     private void initPopup() {
-        testButton = findViewById(R.id.test_button);
-        testButton.setOnClickListener(new View.OnClickListener() {
+        mTestButton = findViewById(R.id.test_button);
+        mTestButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showPopup();
@@ -127,13 +127,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
     private void showPopup() {
-        if (popupWindow == null) {
+        if (mPopupWindow == null) {
             View view = LayoutInflater.from(this).inflate(R.layout.popup_window,null);
-            popupWindow = new PopupWindow(this, null, R.style.Transparent_Dialog);
-            popupWindow.setContentView(view);
+            mPopupWindow = new PopupWindow(this, null, R.style.Transparent_Dialog);
+            mPopupWindow.setContentView(view);
 
-            popupWindow.setOutsideTouchable(true);
-            popupWindow.setAnimationStyle(R.style.anim_menu_bottombar);
+            mPopupWindow.setOutsideTouchable(true);
+            mPopupWindow.setAnimationStyle(R.style.anim_menu_bottombar);
 
 
             ((Button)view.findViewById(R.id.feeling_button_1)).setText("Museum");
@@ -148,10 +148,10 @@ public class MainActivity extends AppCompatActivity {
             buttonList.add(view.findViewById(R.id.feeling_button_4));
 
             for (Button button : buttonList) {
-                button.setOnClickListener(view1 -> popupWindow.dismiss());
+                button.setOnClickListener(view1 -> mPopupWindow.dismiss());
             }
         }
-        popupWindow.showAtLocation(rootView, Gravity.CENTER_VERTICAL | Gravity.LEFT,0, 40);
+        mPopupWindow.showAtLocation(mRootView, Gravity.CENTER_VERTICAL | Gravity.LEFT,0, 40);
     }
 
     private View.OnClickListener getSearchButtonListener() {
@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             private void handleSearchClick(View v) {
-                String textToSearch = editTextPois.getText().toString();
+                String textToSearch = mEditTextPois.getText().toString();
                 if (!textToSearch.isEmpty()) {
                     doFuzzySearch(textToSearch);
                 }
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
             private void doFuzzySearch(String textToSearch) {
                 Log.d(TAG, "doFuzzySearch= " + textToSearch);
                 final Integer QUERY_LIMIT = 10;
-                searchApi.search(new FuzzySearchQueryBuilder(textToSearch)
+                mSearchApi.search(new FuzzySearchQueryBuilder(textToSearch)
                             .withLimit(QUERY_LIMIT).build())
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        tomtomMap.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        mTomtomMap.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private final OnMapReadyCallback onMapReadyCallback =
@@ -204,16 +204,16 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onMapReady(TomtomMap map) {
                     //Map is ready here
-                    tomtomMap = map;
-                    tomtomMap.setMyLocationEnabled(true);
-//                    tomtomMap.collectLogsToFile(SampleApp.LOGCAT_PATH);
-                    //tomtomMap.getMarkerSettings().setMarkerBalloonViewAdapter(createCustomViewAdapter());
+                    mTomtomMap = map;
+                    mTomtomMap.setMyLocationEnabled(true);
+//                    mTomtomMap.collectLogsToFile(SampleApp.LOGCAT_PATH);
+                    //mTomtomMap.getMarkerSettings().setMarkerBalloonViewAdapter(createCustomViewAdapter());
 
-                    tomtomMap.addOnMapLongClickListener(onMapLongClickListener);
-                    mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), tomtomMap);
-                    tripController = new TripController(routingApi, searchApi, mMapElementDisplayer);
-                    tripController.PlanTrip(new LatLng(25.046570, 121.515313), POIGenerator.POITYPE.MUSEUM, 100000);
-                    routePlanner = new RoutePlanner(routingApi, tripController);
+                    mTomtomMap.addOnMapLongClickListener(onMapLongClickListener);
+                    mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), mTomtomMap);
+                    mTripController = new TripController(mRoutingApi, mSearchApi, mMapElementDisplayer);
+                    mTripController.PlanTrip(new LatLng(25.046570, 121.515313), POIGenerator.POITYPE.MUSEUM, 100000);
+                    mRoutePlanner = new RoutePlanner(mRoutingApi, mTripController);
                 }
             };
 
@@ -236,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
 
                     private void setWayPoint(Marker marker) {
                         wayPointPosition = marker.getPosition();
-                        tomtomMap.clearRoute();
+                        mTomtomMap.clearRoute();
                         drawRouteWithWayPoints(departurePosition, destinationPosition, new LatLng[] {wayPointPosition});
                         marker.deselect();
                     }
@@ -248,16 +248,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void planRoute(LatLng start, LatLng end, LatLng[] waypoints) {
         if (start != null && end != null) {
-            tomtomMap.clearRoute();
+            mTomtomMap.clearRoute();
             RouteQuery routeQuery = createRouteQuery(start, end, waypoints);
-            routingApi.planRoute(routeQuery)
+            mRoutingApi.planRoute(routeQuery)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new DisposableSingleObserver<RouteResponse>() {
                         @Override
                         public void onSuccess(RouteResponse routeResult) {
                             mMapElementDisplayer.displayRoutes(routeResult.getRoutes());
-                            tomtomMap.displayRoutesOverview();
+                            mTomtomMap.displayRoutesOverview();
                         }
 
                         @Override
@@ -286,15 +286,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initUIViews() {
-        btnSearch = findViewById(R.id.btn_main_poisearch);
-        editTextPois = findViewById(R.id.edittext_main_poisearch);
-        currentPosition = findViewById(R.id.textview_balloon_poiname);
-        departureBtn = findViewById(R.id.btn_balloon_departure);
-        destinationBtn = findViewById(R.id.btn_balloon_destination);
-        addWaypointBtn = findViewById(R.id.btn_balloon_waypoint);
-        clearWaypointBtn = findViewById(R.id.btn_balloon_clearwaypoint);
+        mBtnSearch = findViewById(R.id.btn_main_poisearch);
+        mEditTextPois = findViewById(R.id.edittext_main_poisearch);
+        mCurrentPosition = findViewById(R.id.textview_balloon_poiname);
+        mDepartureBtn = findViewById(R.id.btn_balloon_departure);
+        mDestinationBtn = findViewById(R.id.btn_balloon_destination);
+        mAddWaypointBtn = findViewById(R.id.btn_balloon_waypoint);
+        mClearWaypointBtn = findViewById(R.id.btn_balloon_clearwaypoint);
 
-        departureBtn.setOnClickListener(new View.OnClickListener() {
+        mDepartureBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("pandia", "departure btn");
@@ -302,14 +302,14 @@ public class MainActivity extends AppCompatActivity {
                 if (mMapElementDisplayer.getCurrentLatLng() != null) {
                     mMapElementDisplayer.setDeparturePosition(new LatLng(mMapElementDisplayer.getCurrentLatLng().toLocation()));
                 }
-                routePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
+                mRoutePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
                                         mMapElementDisplayer.getDestinationPosition(),
                                         mMapElementDisplayer.getAllWaypoints().toArray(new LatLng[0]));
                 mMapElementDisplayer.updateMarkers();
             }
         });
 
-        destinationBtn.setOnClickListener(new View.OnClickListener() {
+        mDestinationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("pandia", "destination btn");
@@ -317,26 +317,26 @@ public class MainActivity extends AppCompatActivity {
                 if (mMapElementDisplayer.getCurrentLatLng() != null) {
                     mMapElementDisplayer.setDestinationPosition(new LatLng(mMapElementDisplayer.getCurrentLatLng().toLocation()));
                 }
-                routePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
+                mRoutePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
                                         mMapElementDisplayer.getDestinationPosition(),
                                         mMapElementDisplayer.getAllWaypoints().toArray(new LatLng[0]));
                 mMapElementDisplayer.updateMarkers();
             }
         });
 
-        clearWaypointBtn.setOnClickListener(new View.OnClickListener() {
+        mClearWaypointBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("pandia", "clear btn");
                 displayMarkerFeatureMenu(false);
-                routePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
+                mRoutePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
                                         mMapElementDisplayer.getDestinationPosition(), null);
                 mMapElementDisplayer.clearWaypoints();
                 mMapElementDisplayer.updateMarkers();
             }
         });
 
-        addWaypointBtn.setOnClickListener(new View.OnClickListener() {
+        mAddWaypointBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("pandia", "add btn");
@@ -344,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
                 if (mMapElementDisplayer.getCurrentLatLng() != null) {
                     mMapElementDisplayer.addWaypoint(new LatLng(mMapElementDisplayer.getCurrentLatLng().toLocation()));
                 }
-                routePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
+                mRoutePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
                                         mMapElementDisplayer.getDestinationPosition(),
                                         mMapElementDisplayer.getAllWaypoints().toArray(new LatLng[0]));
                 mMapElementDisplayer.updateMarkers();
@@ -353,8 +353,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initTomTomServices() {
-        searchApi = OnlineSearchApi.create(this);
-        routingApi = OnlineRoutingApi.create(this);
+        mSearchApi = OnlineSearchApi.create(this);
+        mRoutingApi = OnlineRoutingApi.create(this);
 
     }
 

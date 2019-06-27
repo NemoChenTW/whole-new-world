@@ -34,7 +34,7 @@ public class MapElementDisplayer implements IMapElementDisplay {
     private LatLng mCurrentLatLng;
     private LatLng mDeparturePosition;
     private LatLng mDestinationPosition;
-    private ArrayList<LatLng> allWaypoints = new ArrayList<LatLng>();
+    private ArrayList<LatLng> mAllWaypoints = new ArrayList<LatLng>();
 
     public MapElementDisplayer(Context context, TomtomMap tomtomMap) {
         mContext = context;
@@ -107,7 +107,7 @@ public class MapElementDisplayer implements IMapElementDisplay {
         if (mDestinationPosition != null) {
             createMarkerIfNotPresent(mDestinationPosition, mIconDestination);
         }
-        for (LatLng wp : allWaypoints) {
+        for (LatLng wp : mAllWaypoints) {
             createMarkerIfNotPresent(wp, mIconWaypoint);
         }
     }
@@ -134,7 +134,7 @@ public class MapElementDisplayer implements IMapElementDisplay {
 
     @Override
     public ArrayList<LatLng> getAllWaypoints() {
-        return allWaypoints;
+        return mAllWaypoints;
     }
 
     @Override
@@ -149,12 +149,12 @@ public class MapElementDisplayer implements IMapElementDisplay {
 
     @Override
     public void addWaypoint(LatLng position) {
-        allWaypoints.add(position);
+        mAllWaypoints.add(position);
     }
 
     @Override
     public void clearWaypoints() {
-        allWaypoints.clear();
+        mAllWaypoints.clear();
     }
 
     private void createMarkerIfNotPresent(LatLng position, Icon icon) {
