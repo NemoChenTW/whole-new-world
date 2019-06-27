@@ -18,8 +18,8 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
-import com.taipei.ttbootcamp.controller.Controller;
-import com.taipei.ttbootcamp.implement.MapElementDisplayer;
+import com.taipei.ttbootcamp.controller.TripController;
+import com.taipei.ttbootcamp.implementations.MapElementDisplayer;
 import com.taipei.ttbootcamp.poigenerator.POIGenerator;
 import com.taipei.ttbootcamp.ttsengine.TTSEngine;
 import com.tomtom.online.sdk.common.location.LatLng;
@@ -48,7 +48,7 @@ import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
-    static final String TAG = "MainActivity";
+    static private final String TAG = "MainActivity";
 
     // TomTom service
     private TomtomMap tomtomMap;
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
     private MapElementDisplayer mMapElementDisplayer;
     private RoutePlanner routePlanner;
-    private Controller controller;
+    private TripController tripController;
 
     // View
     private PopupWindow popupWindow;
@@ -211,9 +211,9 @@ public class MainActivity extends AppCompatActivity {
 
                     tomtomMap.addOnMapLongClickListener(onMapLongClickListener);
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), tomtomMap);
-                    controller = new Controller(routingApi, searchApi, mMapElementDisplayer);
-                    controller.PlanTrip(new LatLng(25.046570, 121.515313), POIGenerator.POITYPE.MUSEUM, 100000);
-                    routePlanner = new RoutePlanner(routingApi, controller);
+                    tripController = new TripController(routingApi, searchApi, mMapElementDisplayer);
+                    tripController.PlanTrip(new LatLng(25.046570, 121.515313), POIGenerator.POITYPE.MUSEUM, 100000);
+                    routePlanner = new RoutePlanner(routingApi, tripController);
                 }
             };
 

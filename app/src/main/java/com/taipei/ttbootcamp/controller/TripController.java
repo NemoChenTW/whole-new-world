@@ -20,16 +20,17 @@ import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
 import java.util.ArrayList;
 
-public class Controller implements IPOISearchResult, IFirstPlanResultListener {
+public class TripController implements IPOISearchResult, IFirstPlanResultListener {
+    static private final String TAG = "TripController";
 
     private RoutingApi mRoutingApi;
     private SearchApi mSearchApi;
     private IMapElementDisplay mMapElementDisplay;
-    private LatLng currentPosition;
+    private LatLng mCurrentPosition;
     private RoutePlanner mRoutePlanner;
     private DailyNeedDecorator dailyNeedDecorator;
 
-    public Controller(RoutingApi routingApi, SearchApi searchApi, IMapElementDisplay mapElementDisplay)
+    public TripController(RoutingApi routingApi, SearchApi searchApi, IMapElementDisplay mapElementDisplay)
     {
         mRoutingApi = routingApi;
         mSearchApi = searchApi;
@@ -46,13 +47,13 @@ public class Controller implements IPOISearchResult, IFirstPlanResultListener {
     @Override
     public void onPOISearchResult(ArrayList<FuzzySearchResult> searchResult) {
         LatLng destination = new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation());
-        mRoutePlanner.planRoute(currentPosition, destination, searchResult, 0);
+        mRoutePlanner.planRoute(mCurrentPosition, destination, searchResult, 0);
     }
 
     public void PlanTrip(LatLng currentPosition, POIGenerator.POITYPE poitype, int radius)
     {
-        this.currentPosition = currentPosition;
-        POIGenerator.getPOIsWithType(mSearchApi, this.currentPosition, poitype, radius, this);
+        mCurrentPosition = currentPosition;
+        POIGenerator.getPOIsWithType(mSearchApi, mCurrentPosition, poitype, radius, this);
     }
 
     @Override
@@ -60,6 +61,8 @@ public class Controller implements IPOISearchResult, IFirstPlanResultListener {
         ArrayList<POIWithTravelTime> result = new ArrayList<POIWithTravelTime>();
         if (mMapElementDisplay != null) {
             mMapElementDisplay.displayRoutes(routeResult.getRoutes());
+            // Remove the markers which set by press
+            mMapElementDisplay.removeMarkers();
         }
         for (FullRoute route: routeResult.getRoutes())
         {
@@ -74,7 +77,7 @@ public class Controller implements IPOISearchResult, IFirstPlanResultListener {
                 if (instruction.getInstructionType().equals("LOCATION_WAYPOINT") ||
                         instruction.getInstructionType().equals("LOCATION_ARRIVAL"))
                 {
-                    Log.d("Nick", "Found waypoint or arrival! Time: " + instruction.getTravelTimeInSeconds()
+                    Log.d(TAG, "Found waypoint or arrival! Time: " + instruction.getTravelTimeInSeconds()
                                             + " interval: " + (instruction.getTravelTimeInSeconds() - lastTravelTime));
                     if (originalSearchResult != null) {
                         result.add(new POIWithTravelTime(originalSearchResult.get(fuzzySearchResultIndex), instruction.getTravelTimeInSeconds() - lastTravelTime));
@@ -87,6 +90,6 @@ public class Controller implements IPOISearchResult, IFirstPlanResultListener {
                 }
             }
         }
-        Log.d("Nemo", "result= " + result);
+        Log.d(TAG, "result= " + result);
     }
 }
