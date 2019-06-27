@@ -1,4 +1,4 @@
-package com.taipei.ttbootcamp.implement;
+package com.taipei.ttbootcamp.implementations;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -25,7 +25,7 @@ public class MapElementDisplayer implements IMapElementDisplay {
     Context mContext;
     TomtomMap mTomtomMap = null;
 
-    static final private String MARK_LOCATION_TAG = "mark_location_tag";
+    static private final String MARK_LOCATION_TAG = "mark_location_tag";
     private Icon mIconDeparture;
     private Icon mIconDestination;
     private Icon mIconWaypoint;
@@ -99,19 +99,22 @@ public class MapElementDisplayer implements IMapElementDisplay {
     }
 
     public void updateMarkers() {
-        mTomtomMap.removeMarkers();
+        removeMarkers();
 
         if (mDeparturePosition != null) {
             createMarkerIfNotPresent(mDeparturePosition, mIconDeparture);
         }
-
         if (mDestinationPosition != null) {
             createMarkerIfNotPresent(mDestinationPosition, mIconDestination);
         }
-
         for (LatLng wp : allWaypoints) {
             createMarkerIfNotPresent(wp, mIconWaypoint);
         }
+    }
+
+    @Override
+    public void removeMarkers() {
+        mTomtomMap.removeMarkers();
     }
 
     @Override

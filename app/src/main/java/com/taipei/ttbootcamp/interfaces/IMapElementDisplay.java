@@ -18,6 +18,11 @@ public interface IMapElementDisplay {
      */
     void updateMarkers();
 
+    /**
+     * Remove map markers
+     */
+    void removeMarkers();
+
 
     LatLng getDeparturePosition();
     LatLng getDestinationPosition();

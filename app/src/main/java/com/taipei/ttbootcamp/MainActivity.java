@@ -18,14 +18,13 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
-import com.taipei.ttbootcamp.implement.MapElementDisplayer;
-import com.taipei.ttbootcamp.interfaces.IPOIWithTravelTimeResult;
-import com.taipei.ttbootcamp.interfaces.POIWithTravelTime;
+import com.taipei.ttbootcamp.controller.TripController;
+import com.taipei.ttbootcamp.implementations.MapElementDisplayer;
+import com.taipei.ttbootcamp.poigenerator.POIGenerator;
 import com.taipei.ttbootcamp.ttsengine.TTSEngine;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.map.MapFragment;
 import com.tomtom.online.sdk.map.OnMapReadyCallback;
-import com.tomtom.online.sdk.map.Route;
 import com.tomtom.online.sdk.map.TomtomMap;
 import com.tomtom.online.sdk.map.TomtomMapCallback;
 import com.tomtom.online.sdk.routing.OnlineRoutingApi;
@@ -49,12 +48,18 @@ import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
-    static final String TAG = "MainActivity";
+    static private final String TAG = "MainActivity";
 
     // TomTom service
     private TomtomMap tomtomMap;
+    private RoutingApi routingApi;
+    private SearchApi searchApi;
 
     private MapElementDisplayer mMapElementDisplayer;
+    private RoutePlanner routePlanner;
+    private TripController tripController;
+
+    // View
     private PopupWindow popupWindow;
     private View rootView;
 
@@ -62,6 +67,12 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton btnSearch;
     private EditText editTextPois;
     private TTSEngine mTTSEngine;
+    private Button departureBtn;
+    private Button destinationBtn;
+    private Button addWaypointBtn;
+    private Button clearWaypointBtn;
+
+    private TextView currentPosition;
 
     private BootcampBroadcastReceiver bootcampBroadcastReceiver = new BootcampBroadcastReceiver();
 
@@ -200,12 +211,9 @@ public class MainActivity extends AppCompatActivity {
 
                     tomtomMap.addOnMapLongClickListener(onMapLongClickListener);
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), tomtomMap);
-                    routePlanner = new RoutePlanner(routingApi, mMapElementDisplayer, new IPOIWithTravelTimeResult() {
-                        @Override
-                        public void onPOIWithTravelTimeResult(ArrayList<POIWithTravelTime> result) {
-
-                        }
-                    });
+                    tripController = new TripController(routingApi, searchApi, mMapElementDisplayer);
+                    tripController.PlanTrip(new LatLng(25.046570, 121.515313), POIGenerator.POITYPE.MUSEUM, 100000);
+                    routePlanner = new RoutePlanner(routingApi, tripController);
                 }
             };
 
@@ -349,15 +357,6 @@ public class MainActivity extends AppCompatActivity {
         routingApi = OnlineRoutingApi.create(this);
 
     }
-
-    private RoutingApi routingApi;
-    private SearchApi searchApi;
-    private TextView currentPosition;
-    private Button departureBtn;
-    private Button destinationBtn;
-    private Button addWaypointBtn;
-    private Button clearWaypointBtn;
-    private RoutePlanner routePlanner;
 
     public class BootcampBroadcastReceiver extends BroadcastReceiver {
         static private final String TAG = "BootcampBroadcast";
