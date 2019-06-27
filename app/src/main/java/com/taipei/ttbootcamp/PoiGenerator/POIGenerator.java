@@ -1,4 +1,4 @@
-package com.taipei.ttbootcamp.poigenerator;
+package com.taipei.ttbootcamp.PoiGenerator;
 
 import android.util.Log;
 

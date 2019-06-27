@@ -1,7 +1,6 @@
 package com.taipei.ttbootcamp.RoutePlanner;
 
 import com.taipei.ttbootcamp.interfaces.IFirstPlanResultListener;
-import com.taipei.ttbootcamp.interfaces.IPOIWithTravelTimeResult;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.routing.RoutingApi;
 import com.tomtom.online.sdk.routing.data.InstructionsType;

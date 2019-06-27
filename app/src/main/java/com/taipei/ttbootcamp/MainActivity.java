@@ -17,23 +17,18 @@ import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
+import com.taipei.ttbootcamp.PoiGenerator.POIGenerator;
+import com.taipei.ttbootcamp.Presenter.MainActivityPresenter;
 import com.taipei.ttbootcamp.controller.TripController;
 import com.taipei.ttbootcamp.implementations.MapElementDisplayer;
-import com.taipei.ttbootcamp.poigenerator.POIGenerator;
+import com.taipei.ttbootcamp.interfaces.MainActivityView;
 import com.taipei.ttbootcamp.ttsengine.TTSEngine;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.map.MapFragment;
 import com.tomtom.online.sdk.map.OnMapReadyCallback;
 import com.tomtom.online.sdk.map.TomtomMap;
-import com.tomtom.online.sdk.map.TomtomMapCallback;
 import com.tomtom.online.sdk.routing.OnlineRoutingApi;
 import com.tomtom.online.sdk.routing.RoutingApi;
-import com.tomtom.online.sdk.routing.data.InstructionsType;
-import com.tomtom.online.sdk.routing.data.RouteQuery;
-import com.tomtom.online.sdk.routing.data.RouteQueryBuilder;
-import com.tomtom.online.sdk.routing.data.RouteResponse;
-import com.tomtom.online.sdk.routing.data.RouteType;
 import com.tomtom.online.sdk.search.OnlineSearchApi;
 import com.tomtom.online.sdk.search.SearchApi;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchQueryBuilder;
@@ -47,7 +42,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainActivityView {
     static private final String TAG = "MainActivity";
 
     // TomTom service
@@ -56,8 +51,8 @@ public class MainActivity extends AppCompatActivity {
     private SearchApi mSearchApi;
 
     private MapElementDisplayer mMapElementDisplayer;
-    private RoutePlanner mRoutePlanner;
     private TripController mTripController;
+    private MainActivityPresenter mMainActivityPresenter;
 
     // View
     private PopupWindow mPopupWindow;
@@ -90,19 +85,14 @@ public class MainActivity extends AppCompatActivity {
         initUIViews();
         initTomTomServices();
 
+        mMainActivityPresenter = new MainActivityPresenter(this);
+
         View.OnClickListener searchButtonListener = getSearchButtonListener();
         mBtnSearch.setOnClickListener(searchButtonListener);
 
         initPopup();
         // Create TTS engine
         mTTSEngine = new TTSEngine(this);
-    }
-
-    private TomtomMapCallback.OnMapLongClickListener onMapLongClickListener =
-            latLng -> handleLongClick(latLng);
-
-    private void handleLongClick(LatLng latLng) {
-        displayMarkerFeatureMenu(true);
     }
 
     @Override
@@ -209,11 +199,11 @@ public class MainActivity extends AppCompatActivity {
 //                    mTomtomMap.collectLogsToFile(SampleApp.LOGCAT_PATH);
                     //mTomtomMap.getMarkerSettings().setMarkerBalloonViewAdapter(createCustomViewAdapter());
 
-                    mTomtomMap.addOnMapLongClickListener(onMapLongClickListener);
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), mTomtomMap);
+                    mMainActivityPresenter.initMainActivityPreserter(mMapElementDisplayer);
                     mTripController = new TripController(mRoutingApi, mSearchApi, mMapElementDisplayer);
                     mTripController.PlanTrip(new LatLng(25.046570, 121.515313), POIGenerator.POITYPE.MUSEUM, 100000);
-                    mRoutePlanner = new RoutePlanner(mRoutingApi, mTripController);
+
                 }
             };
 
@@ -246,37 +236,6 @@ public class MainActivity extends AppCompatActivity {
     }
 */
 
-    private void planRoute(LatLng start, LatLng end, LatLng[] waypoints) {
-        if (start != null && end != null) {
-            mTomtomMap.clearRoute();
-            RouteQuery routeQuery = createRouteQuery(start, end, waypoints);
-            mRoutingApi.planRoute(routeQuery)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new DisposableSingleObserver<RouteResponse>() {
-                        @Override
-                        public void onSuccess(RouteResponse routeResult) {
-                            mMapElementDisplayer.displayRoutes(routeResult.getRoutes());
-                            mTomtomMap.displayRoutesOverview();
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            //handleApiError(e);
-                            //clearMap();
-                        }
-                    });
-        }
-    }
-
-    private RouteQuery createRouteQuery(LatLng start, LatLng stop, LatLng[] wayPoints) {
-        return (wayPoints != null && wayPoints.length != 0) ?
-                new RouteQueryBuilder(start, stop).withWayPoints(wayPoints).withRouteType(RouteType.FASTEST)
-                        .withInstructionsType(InstructionsType.TAGGED).build():
-                new RouteQueryBuilder(start, stop).withRouteType(RouteType.FASTEST)
-                        .withInstructionsType(InstructionsType.TAGGED).build();
-    }
-
     public void displayMarkerFeatureMenu(boolean display) {
         if (display) {
             findViewById(R.id.marker_feature_menu).setVisibility(View.VISIBLE);
@@ -297,65 +256,46 @@ public class MainActivity extends AppCompatActivity {
         mDepartureBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("pandia", "departure btn");
-                displayMarkerFeatureMenu(false);
-                if (mMapElementDisplayer.getCurrentLatLng() != null) {
-                    mMapElementDisplayer.setDeparturePosition(new LatLng(mMapElementDisplayer.getCurrentLatLng().toLocation()));
-                }
-                mRoutePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
-                                        mMapElementDisplayer.getDestinationPosition(),
-                                        mMapElementDisplayer.getAllWaypoints().toArray(new LatLng[0]));
-                mMapElementDisplayer.updateMarkers();
+                mMainActivityPresenter.onDepartureButtonClick();
             }
         });
 
         mDestinationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("pandia", "destination btn");
-                displayMarkerFeatureMenu(false);
-                if (mMapElementDisplayer.getCurrentLatLng() != null) {
-                    mMapElementDisplayer.setDestinationPosition(new LatLng(mMapElementDisplayer.getCurrentLatLng().toLocation()));
-                }
-                mRoutePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
-                                        mMapElementDisplayer.getDestinationPosition(),
-                                        mMapElementDisplayer.getAllWaypoints().toArray(new LatLng[0]));
-                mMapElementDisplayer.updateMarkers();
-            }
-        });
-
-        mClearWaypointBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("pandia", "clear btn");
-                displayMarkerFeatureMenu(false);
-                mRoutePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
-                                        mMapElementDisplayer.getDestinationPosition(), null);
-                mMapElementDisplayer.clearWaypoints();
-                mMapElementDisplayer.updateMarkers();
+                mMainActivityPresenter.onDestinationButtonClick();
             }
         });
 
         mAddWaypointBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("pandia", "add btn");
-                displayMarkerFeatureMenu(false);
-                if (mMapElementDisplayer.getCurrentLatLng() != null) {
-                    mMapElementDisplayer.addWaypoint(new LatLng(mMapElementDisplayer.getCurrentLatLng().toLocation()));
-                }
-                mRoutePlanner.planRoute(mMapElementDisplayer.getDeparturePosition(),
-                                        mMapElementDisplayer.getDestinationPosition(),
-                                        mMapElementDisplayer.getAllWaypoints().toArray(new LatLng[0]));
-                mMapElementDisplayer.updateMarkers();
+                mMainActivityPresenter.onAddWaypointButtonClick();
             }
         });
+
+        mClearWaypointBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMainActivityPresenter.onClearWaypointButtonClick();
+            }
+        });
+
     }
 
     private void initTomTomServices() {
         mSearchApi = OnlineSearchApi.create(this);
         mRoutingApi = OnlineRoutingApi.create(this);
+    }
 
+    @Override
+    public void showMarkerFeatureMenu() {
+        displayMarkerFeatureMenu(true);
+    }
+
+    @Override
+    public void hideMarkerFeatureMenu() {
+        displayMarkerFeatureMenu(false);
     }
 
     public class BootcampBroadcastReceiver extends BroadcastReceiver {

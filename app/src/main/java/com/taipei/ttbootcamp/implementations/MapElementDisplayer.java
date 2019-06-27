@@ -18,8 +18,10 @@ import com.tomtom.online.sdk.routing.data.FullRoute;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
-public class MapElementDisplayer implements IMapElementDisplay {
+public class MapElementDisplayer implements IMapElementDisplay, IMapElementDisplay.IPositionUpdateListener {
     static private final String TAG = "MapElementDisplay";
 
     Context mContext;
@@ -35,6 +37,8 @@ public class MapElementDisplayer implements IMapElementDisplay {
     private LatLng mDeparturePosition;
     private LatLng mDestinationPosition;
     private ArrayList<LatLng> mAllWaypoints = new ArrayList<LatLng>();
+
+    private Set<IPositionUpdateListener> mPositionUpdateListeners = new CopyOnWriteArraySet<>();
 
     public MapElementDisplayer(Context context, TomtomMap tomtomMap) {
         mContext = context;
@@ -140,21 +144,49 @@ public class MapElementDisplayer implements IMapElementDisplay {
     @Override
     public void setDeparturePosition(LatLng position) {
         mDeparturePosition = position;
+        onPositionUpdate();
     }
 
     @Override
     public void setDestinationPosition(LatLng position) {
         mDestinationPosition = position;
+        onPositionUpdate();
     }
 
     @Override
     public void addWaypoint(LatLng position) {
         mAllWaypoints.add(position);
+        onPositionUpdate();
     }
 
     @Override
     public void clearWaypoints() {
         mAllWaypoints.clear();
+        onPositionUpdate();
+    }
+
+    @Override
+    public void addPositionUpdateListener(IPositionUpdateListener positionUpdateListener) {
+        mPositionUpdateListeners.add(positionUpdateListener);
+    }
+
+    @Override
+    public void removePositionUpdateListener(IPositionUpdateListener positionUpdateListener) {
+        mPositionUpdateListeners.remove(positionUpdateListener);
+    }
+
+    @Override
+    public TomtomMap getTomtomMap() {
+        return mTomtomMap;
+    }
+
+    @Override
+    public void onPositionUpdate() {
+        if (!mPositionUpdateListeners.isEmpty()) {
+            for (IPositionUpdateListener listener : mPositionUpdateListeners) {
+                listener.onPositionUpdate();
+            }
+        }
     }
 
     private void createMarkerIfNotPresent(LatLng position, Icon icon) {
@@ -164,4 +196,6 @@ public class MapElementDisplayer implements IMapElementDisplay {
                     .icon(icon));
         }
     }
+
+
 }

@@ -1,6 +1,7 @@
 package com.taipei.ttbootcamp.interfaces;
 
 import com.tomtom.online.sdk.common.location.LatLng;
+import com.tomtom.online.sdk.map.TomtomMap;
 import com.tomtom.online.sdk.routing.data.FullRoute;
 
 import java.util.ArrayList;
@@ -23,7 +24,6 @@ public interface IMapElementDisplay {
      */
     void removeMarkers();
 
-
     LatLng getDeparturePosition();
     LatLng getDestinationPosition();
     LatLng getCurrentLatLng();
@@ -33,4 +33,13 @@ public interface IMapElementDisplay {
     void setDestinationPosition(LatLng position);
     void addWaypoint(LatLng position);
     void clearWaypoints();
+
+    void addPositionUpdateListener(IPositionUpdateListener positionUpdateListener);
+    void removePositionUpdateListener(IPositionUpdateListener positionUpdateListener);
+    interface IPositionUpdateListener {
+        void onPositionUpdate();
+    }
+
+    TomtomMap getTomtomMap();
+
 }
