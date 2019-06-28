@@ -13,7 +13,7 @@ public class MainActivityPresenter {
         mView = view;
     }
 
-    public void initMainActivityPreserter(IMapElementDisplay mapElementDisplay) {
+    public void initMainActivityPresenter(IMapElementDisplay mapElementDisplay) {
         mMapElementDisplay = mapElementDisplay;
         mMapElementDisplay.getTomtomMap().addOnMapLongClickListener(onMapLongClickListener);
     }
