@@ -89,7 +89,7 @@ public class DailyNeedDecorator {
     private void findLunchTravelTime(FuzzySearchResult restaurant) {
         int prev = findRestaurantFlag(proposedTrip, LUNCH_FLAG) - 1;
         RoutePlanner routePlanner = new RoutePlanner(routingApi, null);
-        routePlanner.planRoute(proposedTrip.get(prev).fuzzySearchResult.getPosition(), restaurant.getPosition(), null);
+//        routePlanner.planRoute(proposedTrip.get(prev).fuzzySearchResult.getPosition(), restaurant.getPosition(), null);
     }
 
     private void findDinnerRestaurant() {
@@ -124,7 +124,7 @@ public class DailyNeedDecorator {
     private void findDinnerTravelTime(FuzzySearchResult restaurant) {
         int prev = findRestaurantFlag(proposedTrip, DINNER_FLAG) - 1;
         RoutePlanner routePlanner = new RoutePlanner(routingApi, null);
-        routePlanner.planRoute(proposedTrip.get(prev).fuzzySearchResult.getPosition(), restaurant.getPosition(), null);
+//        routePlanner.planRoute(proposedTrip.get(prev).fuzzySearchResult.getPosition(), restaurant.getPosition(), null);
     }
 
     private void doneFinding() {
@@ -192,7 +192,7 @@ public class DailyNeedDecorator {
 
     private void findHotelTravelTime(FuzzySearchResult hotel) {
         RoutePlanner routePlanner = new RoutePlanner(routingApi, null);
-        routePlanner.planRoute(proposedTrip.get(proposedTrip.size() - 1).fuzzySearchResult.getPosition(), hotel.getPosition(), null);
+//        routePlanner.planRoute(proposedTrip.get(proposedTrip.size() - 1).fuzzySearchResult.getPosition(), hotel.getPosition(), null);
     }
 
     private boolean betterEatNow(boolean canEatBeforeThisTrip, boolean canEatAfterThisTrip) {

@@ -6,5 +6,5 @@ import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 import java.util.ArrayList;
 
 public interface IPlanResultListener {
-    void onRoutePlanComplete(RouteResponse routeResult, ArrayList<FuzzySearchResult> originalSearchResult);
+    void onRoutePlanComplete(RouteResponse routeResult, ArrayList<FuzzySearchResult> originalSearchResult, boolean needOptimize);
 }

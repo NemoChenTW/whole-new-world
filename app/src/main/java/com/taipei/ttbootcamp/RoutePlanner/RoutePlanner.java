@@ -1,6 +1,8 @@
 package com.taipei.ttbootcamp.RoutePlanner;
 
-import com.taipei.ttbootcamp.interfaces.IFirstPlanResultListener;
+import android.util.Log;
+
+import com.taipei.ttbootcamp.interfaces.IPlanResultListener;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.routing.RoutingApi;
 import com.tomtom.online.sdk.routing.data.InstructionsType;
@@ -18,27 +20,29 @@ import io.reactivex.schedulers.Schedulers;
 
 public class RoutePlanner {
 
+    private static final String TAG = "RoutePlanner";
     private RoutingApi routingApi;
-    private IFirstPlanResultListener firstPlanResultListener;
+    private IPlanResultListener mPlanResultListener;
     private ArrayList<FuzzySearchResult> mInputSearchResults;
 
-    public RoutePlanner(RoutingApi routingApi, IFirstPlanResultListener firstPlanResultListener)
+    public RoutePlanner(RoutingApi routingApi, IPlanResultListener planResultListener)
     {
         this.routingApi = routingApi;
-        this.firstPlanResultListener = firstPlanResultListener;
+        this.mPlanResultListener = planResultListener;
     }
 
-    public void planRoute(LatLng start, LatLng end, ArrayList<FuzzySearchResult> fuzzySearchResults, int i) {
+    public void planRoute(LatLng start, LatLng end, ArrayList<FuzzySearchResult> fuzzySearchResults, boolean needOptimize) {
+        Log.d(TAG, "planRoute with needOptimize= " + needOptimize);
         this.mInputSearchResults = new ArrayList<FuzzySearchResult>(fuzzySearchResults);
         ArrayList<LatLng> waypoints = new ArrayList<LatLng>();
         for (FuzzySearchResult fresult : mInputSearchResults) {
             waypoints.add(fresult.getPosition());
         }
         waypoints.remove(waypoints.size() - 1);
-        planRoute(start, end, waypoints.toArray(new LatLng[0]));
+        planRoute(start, end, waypoints.toArray(new LatLng[0]), needOptimize);
     }
 
-    public void planRoute(LatLng start, LatLng end, LatLng[] waypoints) {
+    public void planRoute(LatLng start, LatLng end, LatLng[] waypoints, boolean needOptimize) {
         if (start != null && end != null) {
             RouteQuery routeQuery = createRouteQuery(start, end, waypoints);
             routingApi.planRoute(routeQuery)
@@ -47,7 +51,7 @@ public class RoutePlanner {
                     .subscribe(new DisposableSingleObserver<RouteResponse>() {
                         @Override
                         public void onSuccess(RouteResponse routeResult) {
-                            firstPlanResultListener.onRoutePlanComplete(routeResult, mInputSearchResults);
+                            mPlanResultListener.onRoutePlanComplete(routeResult, mInputSearchResults, needOptimize);
                         }
 
                         @Override

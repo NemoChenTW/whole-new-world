@@ -18,9 +18,11 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.taipei.ttbootcamp.PoiGenerator.POIGenerator;
+import com.taipei.ttbootcamp.implementations.TripOptimizer;
 import com.taipei.ttbootcamp.Presenter.MainActivityPresenter;
 import com.taipei.ttbootcamp.controller.TripController;
 import com.taipei.ttbootcamp.implementations.MapElementDisplayer;
+import com.taipei.ttbootcamp.interfaces.ITripOptimizer;
 import com.taipei.ttbootcamp.interfaces.MainActivityView;
 import com.taipei.ttbootcamp.ttsengine.TTSEngine;
 import com.tomtom.online.sdk.common.location.LatLng;
@@ -50,9 +52,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     private RoutingApi mRoutingApi;
     private SearchApi mSearchApi;
 
+    private ITripOptimizer mTripOptimizer;
+    private MainActivityPresenter mMainActivityPresenter;
     private MapElementDisplayer mMapElementDisplayer;
     private TripController mTripController;
-    private MainActivityPresenter mMainActivityPresenter;
 
     // View
     private PopupWindow mPopupWindow;
@@ -79,11 +82,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
         mRootView = findViewById(android.R.id.content);
 
-        MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
-        mapFragment.getAsyncMap(onMapReadyCallback);
-
         initUIViews();
         initTomTomServices();
+
+        MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
+        mapFragment.getAsyncMap(onMapReadyCallback);
 
         mMainActivityPresenter = new MainActivityPresenter(this);
 
@@ -201,9 +204,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), mTomtomMap);
                     mMainActivityPresenter.initMainActivityPreserter(mMapElementDisplayer);
-                    mTripController = new TripController(mRoutingApi, mSearchApi, mMapElementDisplayer);
-                    mTripController.PlanTrip(new LatLng(25.046570, 121.515313), POIGenerator.POITYPE.MUSEUM, 100000);
+                    mTripOptimizer = new TripOptimizer(mSearchApi);
+                    mTripController = new TripController(mRoutingApi, mSearchApi, mMapElementDisplayer, mTripOptimizer);
 
+                    mTripOptimizer.setOptimizeResultListener(mTripController);
+
+                    // Plan test trip
+                    mTripController.PlanTrip(new LatLng(25.046570, 121.515313), POIGenerator.POITYPE.MUSEUM, 100000);
                 }
             };
 
