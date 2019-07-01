@@ -64,10 +64,7 @@ public class RoutePlanner {
     }
 
     private RouteQuery createRouteQuery(LatLng start, LatLng stop, LatLng[] wayPoints) {
-        return (wayPoints != null && wayPoints.length != 0) ?
-                new RouteQueryBuilder(start, stop).withWayPoints(wayPoints).withRouteType(RouteType.FASTEST)
-                        .withInstructionsType(InstructionsType.TAGGED).build():
-                new RouteQueryBuilder(start, stop).withRouteType(RouteType.FASTEST)
-                        .withInstructionsType(InstructionsType.TAGGED).build();
+        RouteQueryBuilder routeQueryBuilder = new RouteQueryBuilder(start, stop).withRouteType(RouteType.FASTEST).withInstructionsType(InstructionsType.TAGGED);
+        return (wayPoints != null && wayPoints.length != 0) ? routeQueryBuilder.withWayPoints(wayPoints).build() : routeQueryBuilder.build();
     }
 }
