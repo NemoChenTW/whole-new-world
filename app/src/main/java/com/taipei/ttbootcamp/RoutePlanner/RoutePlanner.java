@@ -2,6 +2,7 @@ package com.taipei.ttbootcamp.RoutePlanner;
 
 import android.util.Log;
 
+import com.taipei.ttbootcamp.Utils.Utlis;
 import com.taipei.ttbootcamp.interfaces.IPlanResultListener;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.routing.RoutingApi;
@@ -33,11 +34,8 @@ public class RoutePlanner {
 
     public void planRoute(LatLng start, LatLng end, ArrayList<FuzzySearchResult> fuzzySearchResults, boolean needOptimize) {
         Log.d(TAG, "planRoute with needOptimize= " + needOptimize);
-        this.mInputSearchResults = new ArrayList<FuzzySearchResult>(fuzzySearchResults);
-        ArrayList<LatLng> waypoints = new ArrayList<LatLng>();
-        for (FuzzySearchResult fresult : mInputSearchResults) {
-            waypoints.add(fresult.getPosition());
-        }
+        mInputSearchResults = new ArrayList<FuzzySearchResult>(fuzzySearchResults);
+        ArrayList<LatLng> waypoints = Utlis.toLatLngArrayList(mInputSearchResults);
         waypoints.remove(waypoints.size() - 1);
         planRoute(start, end, waypoints.toArray(new LatLng[0]), needOptimize);
     }

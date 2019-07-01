@@ -3,6 +3,7 @@ package com.taipei.ttbootcamp.PoiGenerator;
 import android.util.Log;
 
 import com.google.common.collect.ImmutableList;
+import com.taipei.ttbootcamp.Utils.Utlis;
 import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.common.location.LatLngAcc;
@@ -70,21 +71,12 @@ public class POIGenerator {
                         for (FuzzySearchResult fuzzySearchResult : fuzzySearchResponse.getResults()) {
                             Log.d(TAG, "fuzzySearchResult: " + fuzzySearchResult.toString());
                         }
-                        ArrayList<FuzzySearchResult> filteredResult = filterResult(fuzzySearchResponse.getResults());
-                        searchResultCallback.onPOISearchResult(filteredResult);
+                        searchResultCallback.onPOISearchResult(Utlis.toFuzzySearchResultArraylist(fuzzySearchResponse.getResults()));
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         Log.d(TAG, "Search error: " + e.getMessage());
-                    }
-
-                    private ArrayList<FuzzySearchResult> filterResult(ImmutableList<FuzzySearchResult> searchResults) {
-                        ArrayList<FuzzySearchResult> filteredResult = new ArrayList<>();
-                        for (FuzzySearchResult fuzzySearchResult : searchResults) {
-                            filteredResult.add(fuzzySearchResult);
-                        }
-                        return filteredResult;
                     }
                 });
     }
