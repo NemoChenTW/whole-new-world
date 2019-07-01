@@ -204,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), mTomtomMap);
                     mMainActivityPresenter.initMainActivityPresenter(mMapElementDisplayer);
-                    mTripOptimizer = new TripOptimizer(mSearchApi);
+                    mTripOptimizer = new TripOptimizer(mSearchApi, mRoutingApi);
                     mTripController = new TripController(mRoutingApi, mSearchApi, mMapElementDisplayer, mTripOptimizer);
 
                     mTripOptimizer.setOptimizeResultListener(mTripController);

@@ -1,6 +1,7 @@
 package com.taipei.ttbootcamp.Utils;
 
 import com.google.common.collect.ImmutableList;
+import com.taipei.ttbootcamp.interfaces.POIWithTravelTime;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
@@ -21,6 +22,12 @@ public class Utlis {
             resultList.add(fresult.getPosition());
         }
         return resultList;
+    }
+
+    public static ArrayList<FuzzySearchResult> getFuzzySearchResultsfromPOIWithTravelTime(ArrayList<POIWithTravelTime> poiWithTravelTimeList) {
+        ArrayList<FuzzySearchResult> resultsList = new ArrayList<>();
+        poiWithTravelTimeList.forEach(poi -> resultsList.add(poi.fuzzySearchResult));
+        return resultsList;
     }
 
 }
