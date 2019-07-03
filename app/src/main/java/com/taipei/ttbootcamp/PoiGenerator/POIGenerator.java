@@ -2,17 +2,14 @@ package com.taipei.ttbootcamp.PoiGenerator;
 
 import android.util.Log;
 
-import com.google.common.collect.ImmutableList;
 import com.taipei.ttbootcamp.Utils.Utlis;
+import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
-import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.common.location.LatLngAcc;
 import com.tomtom.online.sdk.search.SearchApi;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchQueryBuilder;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResponse;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
-
-import java.util.ArrayList;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
@@ -52,13 +49,13 @@ public class POIGenerator {
         return ret;
     }
 
-    public static void getPOIsWithType(SearchApi searchApi, LatLng currentPosition,
+    public static void getPOIsWithType(SearchApi searchApi, TripData tripData,
                                        POITYPE poitype, int radius, IPOISearchResult searchResultCallback) {
         String textToSearch = convertPOITypeToText(poitype);
 
         final Integer QUERY_LIMIT = 10;
         searchApi.search(new FuzzySearchQueryBuilder(textToSearch)
-                .withPreciseness(new LatLngAcc(currentPosition, radius))
+                .withPreciseness(new LatLngAcc(tripData.getStartPoint(), radius))
                 .withTypeAhead(true)
                 .withCategory(true)
                 .withLimit(QUERY_LIMIT).build())
@@ -71,7 +68,8 @@ public class POIGenerator {
                         for (FuzzySearchResult fuzzySearchResult : fuzzySearchResponse.getResults()) {
                             Log.d(TAG, "fuzzySearchResult: " + fuzzySearchResult.toString());
                         }
-                        searchResultCallback.onPOISearchResult(Utlis.toFuzzySearchResultArraylist(fuzzySearchResponse.getResults()));
+                        tripData.setFuzzySearchResults(Utlis.toFuzzySearchResultArraylist(fuzzySearchResponse.getResults()));
+                        searchResultCallback.onPOISearchResult(tripData);
                     }
 
                     @Override

@@ -1,8 +1,8 @@
 package com.taipei.ttbootcamp.interfaces;
 
-import java.util.ArrayList;
+import com.taipei.ttbootcamp.data.TripData;
 
 public interface ITripOptimizer {
     void setOptimizeResultListener(IOptimizeResultListener optimizeResultListener);
-    void optimizeTrip(ArrayList<POIWithTravelTime> poiWithTravelTimeList);
+    void optimizeTrip(TripData tripData);
 }

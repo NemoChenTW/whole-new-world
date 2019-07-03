@@ -18,6 +18,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.taipei.ttbootcamp.PoiGenerator.POIGenerator;
+import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.implementations.TripOptimizer;
 import com.taipei.ttbootcamp.Presenter.MainActivityPresenter;
 import com.taipei.ttbootcamp.controller.TripController;
@@ -210,7 +211,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
                     mTripOptimizer.setOptimizeResultListener(mTripController);
 
                     // Plan test trip
-                    mTripController.PlanTrip(new LatLng(25.046570, 121.515313), POIGenerator.POITYPE.MUSEUM, 100000);
+                    TripData tripData = new TripData(new LatLng(25.046570, 121.515313));
+                    mTripController.PlanTrip(tripData, POIGenerator.POITYPE.MUSEUM, 100000);
                 }
             };
 

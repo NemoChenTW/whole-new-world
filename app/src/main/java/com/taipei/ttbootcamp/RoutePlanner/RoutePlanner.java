@@ -3,6 +3,7 @@ package com.taipei.ttbootcamp.RoutePlanner;
 import android.util.Log;
 
 import com.taipei.ttbootcamp.Utils.Utlis;
+import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IPlanResultListener;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.routing.RoutingApi;
@@ -32,24 +33,22 @@ public class RoutePlanner {
         this.mPlanResultListener = planResultListener;
     }
 
-    public void planRoute(LatLng start, LatLng end, ArrayList<FuzzySearchResult> fuzzySearchResults, boolean needOptimize) {
+    public void planRoute(TripData tripData, boolean needOptimize) {
         Log.d(TAG, "planRoute with needOptimize= " + needOptimize);
-        mInputSearchResults = new ArrayList<FuzzySearchResult>(fuzzySearchResults);
-        ArrayList<LatLng> waypoints = Utlis.toLatLngArrayList(mInputSearchResults);
-        waypoints.remove(waypoints.size() - 1);
-        planRoute(start, end, waypoints.toArray(new LatLng[0]), needOptimize);
-    }
+        mInputSearchResults = tripData.getFuzzySearchResults();
+        if (tripData.isWaypointsNeedUpdate()) {
+            tripData.updateWaypointFromSearchResults();
+        }
 
-    public void planRoute(LatLng start, LatLng end, LatLng[] waypoints, boolean needOptimize) {
-        if (start != null && end != null) {
-            RouteQuery routeQuery = createRouteQuery(start, end, waypoints);
+        if (tripData.isAvailableForPlan()) {
+            RouteQuery routeQuery = createRouteQuery(tripData);
             routingApi.planRoute(routeQuery)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new DisposableSingleObserver<RouteResponse>() {
                         @Override
                         public void onSuccess(RouteResponse routeResult) {
-                            mPlanResultListener.onRoutePlanComplete(routeResult, mInputSearchResults, needOptimize);
+                            mPlanResultListener.onRoutePlanComplete(routeResult, tripData, needOptimize);
                         }
 
                         @Override
@@ -61,8 +60,10 @@ public class RoutePlanner {
         }
     }
 
-    private RouteQuery createRouteQuery(LatLng start, LatLng stop, LatLng[] wayPoints) {
-        RouteQueryBuilder routeQueryBuilder = new RouteQueryBuilder(start, stop).withRouteType(RouteType.FASTEST).withInstructionsType(InstructionsType.TAGGED);
-        return (wayPoints != null && wayPoints.length != 0) ? routeQueryBuilder.withWayPoints(wayPoints).build() : routeQueryBuilder.build();
+    private RouteQuery createRouteQuery(TripData tripData) {
+        RouteQueryBuilder routeQueryBuilder = new RouteQueryBuilder(tripData.getStartPoint(), tripData.getEndPoint())
+                                                    .withRouteType(RouteType.FASTEST)
+                                                    .withInstructionsType(InstructionsType.TAGGED);
+        return (tripData.hasWaypoints()) ? routeQueryBuilder.withWayPoints(tripData.getWaypoints()).build() : routeQueryBuilder.build();
     }
 }

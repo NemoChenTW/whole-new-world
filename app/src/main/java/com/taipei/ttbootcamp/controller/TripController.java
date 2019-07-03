@@ -2,15 +2,14 @@ package com.taipei.ttbootcamp.controller;
 
 import android.util.Log;
 
-import com.taipei.ttbootcamp.PoiGenerator.DailyNeedDecorator;
 import com.taipei.ttbootcamp.PoiGenerator.POIGenerator;
 import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
+import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IMapElementDisplay;
 import com.taipei.ttbootcamp.interfaces.IOptimizeResultListener;
 import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
 import com.taipei.ttbootcamp.interfaces.IPlanResultListener;
 import com.taipei.ttbootcamp.interfaces.ITripOptimizer;
-import com.taipei.ttbootcamp.interfaces.POIWithTravelTime;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.routing.RoutingApi;
 import com.tomtom.online.sdk.routing.data.FullRoute;
@@ -32,7 +31,6 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
     private LatLng mCurrentPosition;
     private RoutePlanner mRoutePlanner;
     private ITripOptimizer mTripOptimizer;
-    private DailyNeedDecorator mDailyNeedDecorator;
 
     public TripController(RoutingApi routingApi, SearchApi searchApi, IMapElementDisplay mapElementDisplay, ITripOptimizer tripOptimizer) {
         mRoutingApi = routingApi;
@@ -44,26 +42,32 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
     }
 
     @Override
-    public void onPOISearchResult(ArrayList<FuzzySearchResult> searchResult) {
-        LatLng destination = new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation());
-        mRoutePlanner.planRoute(mCurrentPosition, destination, searchResult, true);
+    public void onPOISearchResult(TripData tripData) {
+        ArrayList<FuzzySearchResult> searchResult = tripData.getFuzzySearchResults();
+        tripData.setEndPoint(new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation()));
+        mRoutePlanner.planRoute(tripData, true);
     }
 
     public void planRoute(LatLng start, LatLng end, LatLng[] waypoints) {
-        mRoutePlanner.planRoute(start, end, waypoints, false);
+        TripData tripData = new TripData(start);
+        tripData.setEndPoint(end);
+        for (LatLng point : waypoints) {
+            tripData.addWaypoints(point);
+        }
+        mRoutePlanner.planRoute(tripData, false);
     }
 
-    public void PlanTrip(LatLng currentPosition, POIGenerator.POITYPE poitype, int radius)
+    public void PlanTrip(TripData tripData, POIGenerator.POITYPE poitype, int radius)
     {
-        mCurrentPosition = currentPosition;
-        POIGenerator.getPOIsWithType(mSearchApi, mCurrentPosition, poitype, radius, this);
+        mCurrentPosition = tripData.getStartPoint();
+        POIGenerator.getPOIsWithType(mSearchApi, tripData, poitype, radius, this);
     }
 
     @Override
-    public void onRoutePlanComplete(RouteResponse routeResult, ArrayList<FuzzySearchResult> originalSearchResult, boolean needOptimize) {
+    public void onRoutePlanComplete(RouteResponse routeResult, TripData tripData, boolean needOptimize) {
         if (needOptimize) {
-            ArrayList<POIWithTravelTime> resultWithTravelTimeList = prepareOptimizeData(routeResult, originalSearchResult);
-            mTripOptimizer.optimizeTrip(resultWithTravelTimeList);
+            tripData.setFuzzySearchResultTravelTimes(prepareOptimizeData(routeResult, tripData.getFuzzySearchResults()));
+            mTripOptimizer.optimizeTrip(tripData);
         } else {
             if (mMapElementDisplay != null) {
                 mMapElementDisplay.displayRoutes(routeResult.getRoutes());
@@ -73,33 +77,27 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
         }
     }
 
-    private ArrayList<POIWithTravelTime> prepareOptimizeData(RouteResponse routeResult, ArrayList<FuzzySearchResult> originalSearchResult) {
-        ArrayList<POIWithTravelTime> resultWithTravelTimeList = new ArrayList<POIWithTravelTime>();
+    private ArrayList<Integer> prepareOptimizeData(RouteResponse routeResult, ArrayList<FuzzySearchResult> originalSearchResult) {
+        ArrayList<Integer> fuzzySearchResultTravelTimes = new ArrayList<Integer>();
+
         for (FullRoute route: routeResult.getRoutes())
         {
             int lastTravelTime = 0;
-            int fuzzySearchResultIndex = 0;
-
             for (Instruction instruction : route.getGuidance().getInstructions())
             {
                 if (instruction.getInstructionType().equals("LOCATION_WAYPOINT") ||
                         instruction.getInstructionType().equals("LOCATION_ARRIVAL"))
                 {
+                    fuzzySearchResultTravelTimes.add(instruction.getTravelTimeInSeconds() - lastTravelTime);
                     Log.d(TAG, "Found waypoint or arrival! Time: " + instruction.getTravelTimeInSeconds()
                                             + " interval: " + (instruction.getTravelTimeInSeconds() - lastTravelTime));
-                    if (originalSearchResult != null) {
-                        resultWithTravelTimeList.add(new POIWithTravelTime(originalSearchResult.get(fuzzySearchResultIndex),
-                                    instruction.getTravelTimeInSeconds() - lastTravelTime));
-                    } else {
-                        resultWithTravelTimeList.add(new POIWithTravelTime(new FuzzySearchResult(), instruction.getTravelTimeInSeconds() - lastTravelTime));
-                    }
+                    fuzzySearchResultTravelTimes.add(instruction.getTravelTimeInSeconds() - lastTravelTime);
                     lastTravelTime = instruction.getTravelTimeInSeconds();
-                    fuzzySearchResultIndex++;
                 }
             }
         }
-        Log.d(TAG, "fuzzySearchResult= " + resultWithTravelTimeList);
-        return resultWithTravelTimeList;
+        Log.d(TAG, "fuzzySearchResultTravelTimes= " + fuzzySearchResultTravelTimes);
+        return fuzzySearchResultTravelTimes;
     }
 
     @Override
@@ -110,11 +108,10 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
     }
 
     @Override
-    public void onOptimizeResult(ArrayList<FuzzySearchResult> searchResult) {
-        for (FuzzySearchResult result :searchResult) {
+    public void onOptimizeResult(TripData tripData) {
+        for (FuzzySearchResult result : tripData.getFuzzySearchResults()) {
             Log.d(TAG, "onOptimizeResult= " + result.getPoi().getName());
         }
-        LatLng destination = new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation());
-        mRoutePlanner.planRoute(mCurrentPosition, destination, searchResult, false);
+        mRoutePlanner.planRoute(tripData, false);
     }
 }

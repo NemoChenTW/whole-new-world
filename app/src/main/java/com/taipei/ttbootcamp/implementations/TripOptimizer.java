@@ -2,10 +2,9 @@ package com.taipei.ttbootcamp.implementations;
 
 import android.util.Log;
 
-import com.taipei.ttbootcamp.Utils.Utlis;
+import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IOptimizeResultListener;
 import com.taipei.ttbootcamp.interfaces.ITripOptimizer;
-import com.taipei.ttbootcamp.interfaces.POIWithTravelTime;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.common.location.LatLngAcc;
 import com.tomtom.online.sdk.routing.RoutingApi;
@@ -19,8 +18,11 @@ import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchQueryBuilder;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResponse;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -40,13 +42,13 @@ public class TripOptimizer implements ITripOptimizer {
         mOptimizeResultListener = optimizeResultListener;
     }
 
-    public void optimizeTrip(ArrayList<POIWithTravelTime> poiWithTravelTimeList) {
-        optimizeWithPetrolStation(poiWithTravelTimeList);
+    public void optimizeTrip(TripData tripData) {
+        optimizeWithPetrolStation(tripData);
 
     }
 
-    private void optimizeWithPetrolStation(ArrayList<POIWithTravelTime> poiWithTravelTimeList) {
-        ArrayList<FuzzySearchResult> storedSearchResult = Utlis.getFuzzySearchResultsfromPOIWithTravelTime(poiWithTravelTimeList);
+    private void optimizeWithPetrolStation(TripData tripData) {
+        ArrayList<FuzzySearchResult> storedSearchResult = tripData.getFuzzySearchResults();
         FuzzySearchResult targetLocation = storedSearchResult.get(storedSearchResult.size() / 2);
         Log.d(TAG, "targetLocation= " + targetLocation.getId());
         LatLng targetSearchCenter = targetLocation.getPosition();
@@ -59,14 +61,14 @@ public class TripOptimizer implements ITripOptimizer {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 // Plan route with search result
-                .flatMap(fuzzySearchResponse -> mRoutingApi.planRoute(
-                        createRouteQuery(new LatLng(25.046570, 121.515313), fuzzySearchResponse, storedSearchResult)))
+                .flatMap(fuzzySearchResponse -> tryThis(
+                        createRouteQuery(tripData, fuzzySearchResponse)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new DisposableSingleObserver<RouteResponse>() {
                     @Override
                     public void onSuccess(RouteResponse routeResult) {
-                        submitOptimizeResult(storedSearchResult);
+                        submitOptimizeResult(tripData);
                     }
 
                     @Override
@@ -77,25 +79,39 @@ public class TripOptimizer implements ITripOptimizer {
                 });
     }
 
-    private RouteQuery createRouteQuery(LatLng start, FuzzySearchResponse fuzzySearchResponse, ArrayList<FuzzySearchResult> storedSearchResult) {
-        FuzzySearchResult newPosition = fuzzySearchResponse.getResults().get(0);
-
-        final int targetIndex = storedSearchResult.size() / 2;
-        storedSearchResult.add(targetIndex + 1, newPosition);
-
-        ArrayList<LatLng> wayPoints = Utlis.toLatLngArrayList(storedSearchResult);
-        final int wayPointSize = wayPoints.size();
-        LatLng stop = new LatLng(wayPoints.get(wayPointSize - 1).toLocation());
-        wayPoints.remove(wayPointSize - 1);
-        LatLng waypointArray[] = new LatLng[wayPoints.size()];
-        waypointArray = wayPoints.toArray(waypointArray);
-
-        return new RouteQueryBuilder(start, stop).withRouteType(RouteType.FASTEST)
-                                                .withInstructionsType(InstructionsType.TAGGED)
-                                                .withWayPoints(waypointArray).build();
+    private Single<RouteResponse> tryThis(RouteQuery var1) {
+        return mRoutingApi.planRoute(var1);
     }
 
-    private void submitOptimizeResult(ArrayList<FuzzySearchResult> optimizeSearchResult) {
-        mOptimizeResultListener.onOptimizeResult(optimizeSearchResult);
+    private RouteQuery createRouteQuery(@NotNull TripData tripData) {
+        RouteQueryBuilder routeQueryBuilder = new RouteQueryBuilder(tripData.getStartPoint(), tripData.getEndPoint())
+                .withRouteType(RouteType.FASTEST)
+                .withInstructionsType(InstructionsType.TAGGED);
+        return (tripData.hasWaypoints()) ? routeQueryBuilder.withWayPoints(tripData.getWaypoints()).build() : routeQueryBuilder.build();
+    }
+
+    private RouteQuery createRouteQuery(@NotNull TripData tripData, @NotNull FuzzySearchResponse fuzzySearchResponse) {
+        FuzzySearchResult newPosition = fuzzySearchResponse.getResults().get(0);
+
+        // Update FuzzySearchResults with new search point
+        ArrayList<FuzzySearchResult> searchResults = tripData.getFuzzySearchResults();
+        final int targetIndex = searchResults.size() / 2;
+        searchResults.add(targetIndex + 1, newPosition);
+
+        tripData.setFuzzySearchResults(searchResults);
+
+        if (tripData.isWaypointsNeedUpdate()) {
+            tripData.updateWaypointFromSearchResults();
+        }
+        tripData.setEndPoint(new LatLng(searchResults.get(searchResults.size() - 1).getPosition().toLocation()));
+
+        return new RouteQueryBuilder(tripData.getStartPoint(), tripData.getEndPoint())
+                                                .withRouteType(RouteType.FASTEST)
+                                                .withInstructionsType(InstructionsType.TAGGED)
+                                                .withWayPoints(tripData.getWaypoints()).build();
+    }
+
+    private void submitOptimizeResult(TripData tripData) {
+        mOptimizeResultListener.onOptimizeResult(tripData);
     }
 }

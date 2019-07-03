@@ -1,9 +1,7 @@
 package com.taipei.ttbootcamp.interfaces;
 
-import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
-
-import java.util.ArrayList;
+import com.taipei.ttbootcamp.data.TripData;
 
 public interface IPOISearchResult {
-    void onPOISearchResult(ArrayList<FuzzySearchResult> searchResult);
+    void onPOISearchResult(TripData tripData);
 }
