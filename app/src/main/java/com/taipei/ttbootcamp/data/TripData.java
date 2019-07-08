@@ -54,7 +54,7 @@ public class TripData {
     }
 
     public ArrayList<FuzzySearchResult> getFuzzySearchResults() {
-        return (ArrayList<FuzzySearchResult>) fuzzySearchResults.clone();
+        return (fuzzySearchResults == null)? null : (ArrayList<FuzzySearchResult>) fuzzySearchResults.clone();
     }
 
     public void setFuzzySearchResults(ArrayList<FuzzySearchResult> fuzzySearchResults) {
@@ -74,7 +74,7 @@ public class TripData {
     }
 
     public boolean isWaypointsNeedUpdate() {
-        return isWaypointsNeedUpdate;
+        return isWaypointsNeedUpdate && (fuzzySearchResults != null && !fuzzySearchResults.isEmpty());
     }
 
     public void updateWaypointFromSearchResults() {
