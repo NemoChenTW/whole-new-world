@@ -65,9 +65,9 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
             mTripOptimizer.optimizeTrip(tripData);
         } else {
             if (mMapElementDisplay != null) {
-                mMapElementDisplay.displayRoutes(routeResult.getRoutes());
                 // Remove the markers which set by press
                 mMapElementDisplay.removeMarkers();
+                mMapElementDisplay.displayRoutes(routeResult.getRoutes(), tripData);
             }
         }
     }

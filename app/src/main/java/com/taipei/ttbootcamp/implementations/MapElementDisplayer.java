@@ -13,6 +13,8 @@ import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.map.Icon;
 import com.tomtom.online.sdk.map.MarkerBuilder;
 import com.tomtom.online.sdk.map.RouteBuilder;
+import com.tomtom.online.sdk.map.SimpleMarkerBalloon;
+import com.tomtom.online.sdk.map.TextBalloonViewAdapter;
 import com.tomtom.online.sdk.map.TomtomMap;
 import com.tomtom.online.sdk.map.TomtomMapCallback;
 import com.tomtom.online.sdk.routing.data.FullRoute;
@@ -28,15 +30,11 @@ public class MapElementDisplayer implements IMapElementDisplay, IMapElementDispl
     Context mContext;
     TomtomMap mTomtomMap = null;
 
-    static private final String MARK_LOCATION_TAG = "mark_location_tag";
+    private static final String MARK_LOCATION_TAG = "mark_location_tag";
+    private static final String WAY_POINT_TAG = "way_point_tag";
     private Icon mIconDeparture;
     private Icon mIconDestination;
-    private Icon mIconWaypoint;
     private Icon mIconMarkLocation;
-
-    private LatLng mDeparturePosition;
-    private LatLng mDestinationPosition;
-    private ArrayList<LatLng> mAllWaypoints = new ArrayList<LatLng>();
 
     private Set<IPositionUpdateListener> mPositionUpdateListeners = new CopyOnWriteArraySet<>();
 
@@ -54,15 +52,30 @@ public class MapElementDisplayer implements IMapElementDisplay, IMapElementDispl
     private void initMapRelatedElement() {
         mIconDeparture = Icon.Factory.fromResources(mContext, R.drawable.ic_map_route_departure);
         mIconDestination = Icon.Factory.fromResources(mContext, R.drawable.ic_map_route_destination);
-        mIconWaypoint = Icon.Factory.fromResources(mContext, R.drawable.ic_map_traffic_danger_midgrey_small);
         mIconMarkLocation = Icon.Factory.fromResources(mContext, R.drawable.ic_markedlocation);
     }
 
-    public void displayRoutes(List<FullRoute> routes) {
+    public void displayRoutes(List<FullRoute> routes, TripData tripData) {
         mTomtomMap.clearRoute();
         for (FullRoute fullRoute : routes) {
             mTomtomMap.addRoute(new RouteBuilder(
                     fullRoute.getCoordinates()).startIcon(mIconDeparture).endIcon(mIconDestination).isActive(true));
+        }
+
+        if (tripData.hasWaypoints()) {
+            displayWayPoints(tripData);
+        }
+    }
+
+    private void displayWayPoints(TripData tripData) {
+        mTomtomMap.removeMarkerByTag(WAY_POINT_TAG);
+        mTomtomMap.getMarkerSettings().setMarkerBalloonViewAdapter(new TextBalloonViewAdapter());
+        int index = 0;
+        for (LatLng position : tripData.getWaypoints()) {
+            MarkerBuilder markerBuilder = new MarkerBuilder(position)
+                    .markerBalloon(new SimpleMarkerBalloon(new Integer(index++).toString()))
+                    .tag(WAY_POINT_TAG);
+            mTomtomMap.addMarker(markerBuilder);
         }
     }
 
@@ -112,10 +125,6 @@ public class MapElementDisplayer implements IMapElementDisplay, IMapElementDispl
         }
         if (destinationPosition != null) {
             createMarkerIfNotPresent(destinationPosition, mIconDestination);
-        }
-
-        for (LatLng wp : tripData.getWaypoints()) {
-            createMarkerIfNotPresent(wp, mIconWaypoint);
         }
     }
 
