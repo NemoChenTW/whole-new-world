@@ -200,6 +200,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
                     //Map is ready here
                     mTomtomMap = map;
                     mTomtomMap.setMyLocationEnabled(true);
+                    mTomtomMap.getUiSettings().getZoomingControlsView().show();
 //                    mTomtomMap.collectLogsToFile(SampleApp.LOGCAT_PATH);
                     //mTomtomMap.getMarkerSettings().setMarkerBalloonViewAdapter(createCustomViewAdapter());
 
