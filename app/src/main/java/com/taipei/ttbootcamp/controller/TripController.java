@@ -48,12 +48,7 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
         mRoutePlanner.planRoute(tripData, true);
     }
 
-    public void planRoute(LatLng start, LatLng end, LatLng[] waypoints) {
-        TripData tripData = new TripData(start);
-        tripData.setEndPoint(end);
-        for (LatLng point : waypoints) {
-            tripData.addWaypoints(point);
-        }
+    public void planRoute(TripData tripData) {
         mRoutePlanner.planRoute(tripData, false);
     }
 
@@ -101,10 +96,8 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
     }
 
     @Override
-    public void onPositionUpdate() {
-        planRoute(mMapElementDisplay.getDeparturePosition(),
-                    mMapElementDisplay.getDestinationPosition(),
-                    mMapElementDisplay.getAllWaypoints().toArray(new LatLng[0]));
+    public void onPositionUpdate(TripData tripData) {
+        planRoute(tripData);
     }
 
     @Override

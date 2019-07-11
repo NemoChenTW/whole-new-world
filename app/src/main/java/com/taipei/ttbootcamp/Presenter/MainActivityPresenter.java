@@ -1,5 +1,6 @@
 package com.taipei.ttbootcamp.Presenter;
 
+import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IMapElementDisplay;
 import com.taipei.ttbootcamp.interfaces.MainActivityView;
 import com.tomtom.online.sdk.common.location.LatLng;
@@ -8,9 +9,12 @@ import com.tomtom.online.sdk.map.TomtomMapCallback;
 public class MainActivityPresenter {
     IMapElementDisplay mMapElementDisplay;
     MainActivityView mView;
+    TripData mTripData;
+    LatLng mClickPosition;
 
     public MainActivityPresenter(MainActivityView view) {
         mView = view;
+        mTripData = new TripData();
     }
 
     public void initMainActivityPresenter(IMapElementDisplay mapElementDisplay) {
@@ -23,34 +27,40 @@ public class MainActivityPresenter {
 
     private void handleLongClick(LatLng latLng) {
         mView.showMarkerFeatureMenu();
+        mClickPosition = latLng;
     }
 
     public void onDepartureButtonClick() {
-        if (mMapElementDisplay.getCurrentLatLng() != null) {
-            mMapElementDisplay.setDeparturePosition(new LatLng(mMapElementDisplay.getCurrentLatLng().toLocation()));
-        }
-        mMapElementDisplay.updateMarkers();
+        mTripData.setStartPoint(mClickPosition);
+        mMapElementDisplay.updateMarkers(mTripData);
         mView.hideMarkerFeatureMenu();
+        positionUpdate();
     }
 
     public void onDestinationButtonClick() {
-        if (mMapElementDisplay.getCurrentLatLng() != null) {
-            mMapElementDisplay.setDestinationPosition(new LatLng(mMapElementDisplay.getCurrentLatLng().toLocation()));
-        }
-        mMapElementDisplay.updateMarkers();
+        mTripData.setEndPoint(mClickPosition);
+        mMapElementDisplay.updateMarkers(mTripData);
         mView.hideMarkerFeatureMenu();
+        positionUpdate();
     }
     public void onAddWaypointButtonClick() {
-        if (mMapElementDisplay.getCurrentLatLng() != null) {
-            mMapElementDisplay.addWaypoint(new LatLng(mMapElementDisplay.getCurrentLatLng().toLocation()));
-        }
-        mMapElementDisplay.updateMarkers();
+        mTripData.addWaypoints(mClickPosition);
+        mMapElementDisplay.updateMarkers(mTripData);
         mView.hideMarkerFeatureMenu();
+        positionUpdate();
     }
 
     public void onClearWaypointButtonClick() {
-        mMapElementDisplay.clearWaypoints();
-        mMapElementDisplay.updateMarkers();
+        mTripData.removeWaypoints();
+        mMapElementDisplay.updateMarkers(mTripData);
         mView.hideMarkerFeatureMenu();
+        positionUpdate();
     }
+
+    private void positionUpdate() {
+        if (mTripData.isAvailableForPlan()) {
+            ((IMapElementDisplay.IPositionUpdateListener) mMapElementDisplay).onPositionUpdate(mTripData);
+        }
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.taipei.ttbootcamp.interfaces;
 
+import com.taipei.ttbootcamp.data.TripData;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.map.TomtomMap;
 import com.tomtom.online.sdk.routing.data.FullRoute;
@@ -16,28 +17,19 @@ public interface IMapElementDisplay {
 
     /**
      * Update map markers
+     * @param tripData
      */
-    void updateMarkers();
+    void updateMarkers(TripData tripData);
 
     /**
      * Remove map markers
      */
     void removeMarkers();
 
-    LatLng getDeparturePosition();
-    LatLng getDestinationPosition();
-    LatLng getCurrentLatLng();
-    ArrayList<LatLng> getAllWaypoints();
-
-    void setDeparturePosition(LatLng position);
-    void setDestinationPosition(LatLng position);
-    void addWaypoint(LatLng position);
-    void clearWaypoints();
-
     void addPositionUpdateListener(IPositionUpdateListener positionUpdateListener);
     void removePositionUpdateListener(IPositionUpdateListener positionUpdateListener);
     interface IPositionUpdateListener {
-        void onPositionUpdate();
+        void onPositionUpdate(TripData tripData);
     }
 
     TomtomMap getTomtomMap();

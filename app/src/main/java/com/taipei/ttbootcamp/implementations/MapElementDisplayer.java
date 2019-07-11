@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.google.common.base.Optional;
 import com.taipei.ttbootcamp.R;
+import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IMapElementDisplay;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.map.Icon;
@@ -33,7 +34,6 @@ public class MapElementDisplayer implements IMapElementDisplay, IMapElementDispl
     private Icon mIconWaypoint;
     private Icon mIconMarkLocation;
 
-    private LatLng mCurrentLatLng;
     private LatLng mDeparturePosition;
     private LatLng mDestinationPosition;
     private ArrayList<LatLng> mAllWaypoints = new ArrayList<LatLng>();
@@ -89,7 +89,6 @@ public class MapElementDisplayer implements IMapElementDisplay, IMapElementDispl
     }
     private void handleLongClick(@NonNull LatLng latLng) {
         updateMarkLocation(latLng);
-        mCurrentLatLng = latLng;
     }
 
     private void updateMarkLocation(LatLng position) {
@@ -102,16 +101,20 @@ public class MapElementDisplayer implements IMapElementDisplay, IMapElementDispl
         }
     }
 
-    public void updateMarkers() {
+    public void updateMarkers(TripData tripData) {
         removeMarkers();
 
-        if (mDeparturePosition != null) {
-            createMarkerIfNotPresent(mDeparturePosition, mIconDeparture);
+        LatLng departurePosition = tripData.getStartPoint();
+        LatLng destinationPosition = tripData.getEndPoint();
+
+        if (departurePosition != null) {
+            createMarkerIfNotPresent(departurePosition, mIconDeparture);
         }
-        if (mDestinationPosition != null) {
-            createMarkerIfNotPresent(mDestinationPosition, mIconDestination);
+        if (destinationPosition != null) {
+            createMarkerIfNotPresent(destinationPosition, mIconDestination);
         }
-        for (LatLng wp : mAllWaypoints) {
+
+        for (LatLng wp : tripData.getWaypoints()) {
             createMarkerIfNotPresent(wp, mIconWaypoint);
         }
     }
@@ -119,50 +122,6 @@ public class MapElementDisplayer implements IMapElementDisplay, IMapElementDispl
     @Override
     public void removeMarkers() {
         mTomtomMap.removeMarkers();
-    }
-
-    @Override
-    public LatLng getDeparturePosition() {
-        return mDeparturePosition;
-    }
-
-    @Override
-    public LatLng getDestinationPosition() {
-        return mDestinationPosition;
-    }
-
-    @Override
-    public LatLng getCurrentLatLng() {
-        return mCurrentLatLng;
-    }
-
-    @Override
-    public ArrayList<LatLng> getAllWaypoints() {
-        return mAllWaypoints;
-    }
-
-    @Override
-    public void setDeparturePosition(LatLng position) {
-        mDeparturePosition = position;
-        onPositionUpdate();
-    }
-
-    @Override
-    public void setDestinationPosition(LatLng position) {
-        mDestinationPosition = position;
-        onPositionUpdate();
-    }
-
-    @Override
-    public void addWaypoint(LatLng position) {
-        mAllWaypoints.add(position);
-        onPositionUpdate();
-    }
-
-    @Override
-    public void clearWaypoints() {
-        mAllWaypoints.clear();
-        onPositionUpdate();
     }
 
     @Override
@@ -181,10 +140,10 @@ public class MapElementDisplayer implements IMapElementDisplay, IMapElementDispl
     }
 
     @Override
-    public void onPositionUpdate() {
+    public void onPositionUpdate(TripData tripData) {
         if (!mPositionUpdateListeners.isEmpty()) {
             for (IPositionUpdateListener listener : mPositionUpdateListeners) {
-                listener.onPositionUpdate();
+                listener.onPositionUpdate(tripData);
             }
         }
     }

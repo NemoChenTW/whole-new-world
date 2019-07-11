@@ -17,6 +17,8 @@ public class TripData {
 
     private boolean isWaypointsNeedUpdate = false;
 
+    public TripData() {}
+
     public TripData(final LatLng startPoint) {
         this.startPoint = startPoint;
     }
@@ -30,7 +32,13 @@ public class TripData {
     }
 
     public void addWaypoints(final LatLng latLng) {
-        wayPoints.add(latLng);
+        if (latLng != null) {
+            wayPoints.add(latLng);
+        }
+    }
+
+    public void removeWaypoints() {
+        wayPoints.clear();
     }
 
     public LatLng getEndPoint() {
