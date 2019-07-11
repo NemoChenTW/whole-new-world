@@ -10,7 +10,7 @@ public class TripData {
     private static final String TAG = "TripData";
     private LatLng startPoint;
     private LatLng endPoint;
-    private ArrayList<LatLng> wayPoints = new ArrayList<>();
+    private ArrayList<LocationPoint> wayPoints = new ArrayList<>();
 
     private ArrayList<FuzzySearchResult> fuzzySearchResults;
     private ArrayList<Integer> fuzzySearchResultTravelTimes;
@@ -33,8 +33,12 @@ public class TripData {
 
     public void addWaypoints(final LatLng latLng) {
         if (latLng != null) {
-            wayPoints.add(latLng);
+            wayPoints.add(new LocationPoint(latLng));
         }
+    }
+
+    public void addWaypoints(final LocationPoint locationPoint) {
+        wayPoints.add(locationPoint);
     }
 
     public void removeWaypoints() {
@@ -45,8 +49,14 @@ public class TripData {
         return endPoint;
     }
 
-    public LatLng[] getWaypoints() {
-        return wayPoints.toArray(new LatLng[0]);
+    public ArrayList<LocationPoint> getWayPoints() {
+        return (wayPoints == null)? null : (ArrayList<LocationPoint>) wayPoints.clone();
+    }
+
+    public LatLng[] getWaypointsLatLng() {
+        ArrayList <LatLng> latLngs = new ArrayList<>();
+        wayPoints.forEach(locationPoint -> latLngs.add(locationPoint.getPosition()));
+        return latLngs.toArray(new LatLng[0]);
     }
 
     public void setEndPoint(LatLng endPoint) {

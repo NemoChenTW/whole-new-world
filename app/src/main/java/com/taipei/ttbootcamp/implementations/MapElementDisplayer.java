@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.google.common.base.Optional;
 import com.taipei.ttbootcamp.R;
+import com.taipei.ttbootcamp.data.LocationPoint;
 import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IMapElementDisplay;
 import com.tomtom.online.sdk.common.location.LatLng;
@@ -19,7 +20,6 @@ import com.tomtom.online.sdk.map.TomtomMap;
 import com.tomtom.online.sdk.map.TomtomMapCallback;
 import com.tomtom.online.sdk.routing.data.FullRoute;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -70,10 +70,9 @@ public class MapElementDisplayer implements IMapElementDisplay, IMapElementDispl
     private void displayWayPoints(TripData tripData) {
         mTomtomMap.removeMarkerByTag(WAY_POINT_TAG);
         mTomtomMap.getMarkerSettings().setMarkerBalloonViewAdapter(new TextBalloonViewAdapter());
-        int index = 0;
-        for (LatLng position : tripData.getWaypoints()) {
-            MarkerBuilder markerBuilder = new MarkerBuilder(position)
-                    .markerBalloon(new SimpleMarkerBalloon(new Integer(index++).toString()))
+        for (LocationPoint locationPoint : tripData.getWayPoints()) {
+            MarkerBuilder markerBuilder = new MarkerBuilder(locationPoint.getPosition())
+                    .markerBalloon(new SimpleMarkerBalloon(locationPoint.getName()))
                     .tag(WAY_POINT_TAG);
             mTomtomMap.addMarker(markerBuilder);
         }

@@ -2,10 +2,8 @@ package com.taipei.ttbootcamp.RoutePlanner;
 
 import android.util.Log;
 
-import com.taipei.ttbootcamp.Utils.Utlis;
 import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IPlanResultListener;
-import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.routing.RoutingApi;
 import com.tomtom.online.sdk.routing.data.InstructionsType;
 import com.tomtom.online.sdk.routing.data.RouteQuery;
@@ -64,6 +62,6 @@ public class RoutePlanner {
         RouteQueryBuilder routeQueryBuilder = new RouteQueryBuilder(tripData.getStartPoint(), tripData.getEndPoint())
                                                     .withRouteType(RouteType.FASTEST)
                                                     .withInstructionsType(InstructionsType.TAGGED);
-        return (tripData.hasWaypoints()) ? routeQueryBuilder.withWayPoints(tripData.getWaypoints()).build() : routeQueryBuilder.build();
+        return (tripData.hasWaypoints()) ? routeQueryBuilder.withWayPoints(tripData.getWaypointsLatLng()).build() : routeQueryBuilder.build();
     }
 }

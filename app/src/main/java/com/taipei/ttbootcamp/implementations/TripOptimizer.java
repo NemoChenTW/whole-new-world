@@ -87,7 +87,7 @@ public class TripOptimizer implements ITripOptimizer {
         RouteQueryBuilder routeQueryBuilder = new RouteQueryBuilder(tripData.getStartPoint(), tripData.getEndPoint())
                 .withRouteType(RouteType.FASTEST)
                 .withInstructionsType(InstructionsType.TAGGED);
-        return (tripData.hasWaypoints()) ? routeQueryBuilder.withWayPoints(tripData.getWaypoints()).build() : routeQueryBuilder.build();
+        return (tripData.hasWaypoints()) ? routeQueryBuilder.withWayPoints(tripData.getWaypointsLatLng()).build() : routeQueryBuilder.build();
     }
 
     private RouteQuery createRouteQuery(@NotNull TripData tripData, @NotNull FuzzySearchResponse fuzzySearchResponse) {
@@ -108,7 +108,7 @@ public class TripOptimizer implements ITripOptimizer {
         return new RouteQueryBuilder(tripData.getStartPoint(), tripData.getEndPoint())
                                                 .withRouteType(RouteType.FASTEST)
                                                 .withInstructionsType(InstructionsType.TAGGED)
-                                                .withWayPoints(tripData.getWaypoints()).build();
+                                                .withWayPoints(tripData.getWaypointsLatLng()).build();
     }
 
     private void submitOptimizeResult(TripData tripData) {

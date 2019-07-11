@@ -1,5 +1,6 @@
 package com.taipei.ttbootcamp.Presenter;
 
+import com.taipei.ttbootcamp.data.LocationPoint;
 import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IMapElementDisplay;
 import com.taipei.ttbootcamp.interfaces.MainActivityView;
@@ -11,6 +12,7 @@ public class MainActivityPresenter {
     MainActivityView mView;
     TripData mTripData;
     LatLng mClickPosition;
+    private LocationPoint mLocationPoint;
 
     public MainActivityPresenter(MainActivityView view) {
         mView = view;
@@ -28,6 +30,7 @@ public class MainActivityPresenter {
     private void handleLongClick(LatLng latLng) {
         mView.showMarkerFeatureMenu();
         mClickPosition = latLng;
+        mLocationPoint = new LocationPoint(latLng);
     }
 
     public void onDepartureButtonClick() {
@@ -44,7 +47,7 @@ public class MainActivityPresenter {
         tryRoutePlan();
     }
     public void onAddWaypointButtonClick() {
-        mTripData.addWaypoints(mClickPosition);
+        mTripData.addWaypoints(mLocationPoint);
         mMapElementDisplay.updateMarkers(mTripData);
         mView.hideMarkerFeatureMenu();
         tryRoutePlan();
