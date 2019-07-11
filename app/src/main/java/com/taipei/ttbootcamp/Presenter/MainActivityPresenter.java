@@ -34,30 +34,30 @@ public class MainActivityPresenter {
         mTripData.setStartPoint(mClickPosition);
         mMapElementDisplay.updateMarkers(mTripData);
         mView.hideMarkerFeatureMenu();
-        positionUpdate();
+        tryRoutePlan();
     }
 
     public void onDestinationButtonClick() {
         mTripData.setEndPoint(mClickPosition);
         mMapElementDisplay.updateMarkers(mTripData);
         mView.hideMarkerFeatureMenu();
-        positionUpdate();
+        tryRoutePlan();
     }
     public void onAddWaypointButtonClick() {
         mTripData.addWaypoints(mClickPosition);
         mMapElementDisplay.updateMarkers(mTripData);
         mView.hideMarkerFeatureMenu();
-        positionUpdate();
+        tryRoutePlan();
     }
 
     public void onClearWaypointButtonClick() {
         mTripData.removeWaypoints();
         mMapElementDisplay.updateMarkers(mTripData);
         mView.hideMarkerFeatureMenu();
-        positionUpdate();
+        tryRoutePlan();
     }
 
-    private void positionUpdate() {
+    private void tryRoutePlan() {
         if (mTripData.isAvailableForPlan()) {
             ((IMapElementDisplay.IPositionUpdateListener) mMapElementDisplay).onPositionUpdate(mTripData);
         }
