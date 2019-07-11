@@ -6,8 +6,13 @@ public class LocationPoint {
     private String mName;
     private LatLng mPosition;
 
-    public LocationPoint(LatLng position) {
+    public LocationPoint(final LatLng position) {
         mPosition = position;
+    }
+
+    public LocationPoint(final LatLng position, final String name) {
+        mPosition = position;
+        mName = name;
     }
 
     public String getName() {

@@ -1,6 +1,5 @@
 package com.taipei.ttbootcamp.data;
 
-import com.taipei.ttbootcamp.Utils.Utlis;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
@@ -98,9 +97,7 @@ public class TripData {
     public void updateWaypointFromSearchResults() {
         isWaypointsNeedUpdate = false;
         wayPoints.clear();
-        ArrayList<LatLng> waypoints = Utlis.toLatLngArrayList(this.fuzzySearchResults);
-
-        waypoints.remove(waypoints.size() - 1);
-        waypoints.forEach(p -> addWaypoints(p));
+        this.fuzzySearchResults.forEach(result -> wayPoints.add(new LocationPoint(result.getPosition(), result.getPoi().getName())));
+        wayPoints.remove(wayPoints.size() - 1);
     }
 }
