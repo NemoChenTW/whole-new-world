@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
                     //mTomtomMap.getMarkerSettings().setMarkerBalloonViewAdapter(createCustomViewAdapter());
 
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), mTomtomMap);
-                    mMainActivityPresenter.initMainActivityPresenter(mMapElementDisplayer);
+                    mMainActivityPresenter.initMainActivityPresenter(mMapElementDisplayer, mSearchApi);
                     mTripOptimizer = new TripOptimizer(mSearchApi, mRoutingApi);
                     mTripController = new TripController(mRoutingApi, mSearchApi, mMapElementDisplayer, mTripOptimizer);
 
