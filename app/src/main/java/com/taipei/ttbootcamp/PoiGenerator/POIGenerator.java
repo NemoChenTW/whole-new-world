@@ -49,8 +49,8 @@ public class POIGenerator {
         return ret;
     }
 
-    public static void getPOIsWithType(SearchApi searchApi, TripData tripData,
-                                       POITYPE poitype, int radius, IPOISearchResult searchResultCallback) {
+    public static void queryWithCategory(SearchApi searchApi, TripData tripData,
+                                         POITYPE poitype, int radius, IPOISearchResult searchResultCallback) {
         String textToSearch = convertPOITypeToText(poitype);
 
         final Integer QUERY_LIMIT = 10;

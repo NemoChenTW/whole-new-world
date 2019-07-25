@@ -52,7 +52,7 @@ public class DailyNeedDecorator {
 //            int index = findRestaurantFlag(proposedTrip, LUNCH_FLAG);
 //
 //            if (index >= 0) {
-//                POIGenerator.getPOIsWithType(searchApi, proposedTrip.get(index - 1).fuzzySearchResult.getPosition(),
+//                POIGenerator.queryWithCategory(searchApi, proposedTrip.get(index - 1).fuzzySearchResult.getPosition(),
 //                        POIGenerator.POITYPE.FOOD, DEFAULT_RESTAURANT_RADIUS, new IPOISearchResult() {
 //                            @Override
 //                            public void onPOISearchResult(ArrayList<FuzzySearchResult> searchResult) {
@@ -97,7 +97,7 @@ public class DailyNeedDecorator {
 //            int index = findRestaurantFlag(proposedTrip, DINNER_FLAG);
 //
 //            if (index >= 0) {
-//                POIGenerator.getPOIsWithType(searchApi, proposedTrip.get(index - 1).fuzzySearchResult.getPosition(),
+//                POIGenerator.queryWithCategory(searchApi, proposedTrip.get(index - 1).fuzzySearchResult.getPosition(),
 //                        POIGenerator.POITYPE.FOOD, DEFAULT_RESTAURANT_RADIUS, new IPOISearchResult() {
 //                            @Override
 //                            public void onPOISearchResult(ArrayList<FuzzySearchResult> searchResult) {
@@ -178,7 +178,7 @@ public class DailyNeedDecorator {
 //    private void addHotel() {
 //        POIWithTravelTime hotelPoint = new POIWithTravelTime(new FuzzySearchResult(), 12*60);
 //
-//        POIGenerator.getPOIsWithType(searchApi, proposedTrip.get(proposedTrip.size() - 1).fuzzySearchResult.getPosition(),
+//        POIGenerator.queryWithCategory(searchApi, proposedTrip.get(proposedTrip.size() - 1).fuzzySearchResult.getPosition(),
 //                POIGenerator.POITYPE.HOTEL, DEFAULT_HOTEL_RADIUS, new IPOISearchResult() {
 //                    @Override
 //                    public void onPOISearchResult(ArrayList<FuzzySearchResult> searchResult) {

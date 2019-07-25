@@ -28,7 +28,6 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
     private RoutingApi mRoutingApi;
     private SearchApi mSearchApi;
     private IMapElementDisplay mMapElementDisplay;
-    private LatLng mCurrentPosition;
     private RoutePlanner mRoutePlanner;
     private ITripOptimizer mTripOptimizer;
 
@@ -54,8 +53,7 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
 
     public void PlanTrip(TripData tripData, POIGenerator.POITYPE poitype, int radius)
     {
-        mCurrentPosition = tripData.getStartPoint();
-        POIGenerator.getPOIsWithType(mSearchApi, tripData, poitype, radius, this);
+        POIGenerator.queryWithCategory(mSearchApi, tripData, poitype, radius, this);
     }
 
     @Override

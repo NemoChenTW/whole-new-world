@@ -61,7 +61,7 @@ public class TripOptimizer implements ITripOptimizer {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 // Plan route with search result
-                .flatMap(fuzzySearchResponse -> tryThis(
+                .flatMap(fuzzySearchResponse -> mRoutingApi.planRoute(
                         createRouteQuery(tripData, fuzzySearchResponse)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -77,10 +77,6 @@ public class TripOptimizer implements ITripOptimizer {
                         //clearMap();
                     }
                 });
-    }
-
-    private Single<RouteResponse> tryThis(RouteQuery var1) {
-        return mRoutingApi.planRoute(var1);
     }
 
     private RouteQuery createRouteQuery(@NotNull TripData tripData) {
