@@ -17,6 +17,11 @@ import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.taipei.ttbootcamp.PoiGenerator.POIGenerator;
 import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.implementations.TripOptimizer;
@@ -39,6 +44,8 @@ import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResponse;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -85,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
         initUIViews();
         initTomTomServices();
+        initialGooglePlace();
 
         MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         mapFragment.getAsyncMap(onMapReadyCallback);
@@ -97,6 +105,40 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         initPopup();
         // Create TTS engine
         mTTSEngine = new TTSEngine(this);
+    }
+
+    private void initialGooglePlace() {
+        // Initialize the SDK
+        Places.initialize(getApplicationContext(), BuildConfig.ApiKey);
+
+        // Create a new Places client instance
+        PlacesClient placesClient = Places.createClient(this);
+        requestPlaceDetails(placesClient);
+    }
+
+    private void requestPlaceDetails(final PlacesClient placesClient) {
+        // Define a Place ID.
+        String placeId = "ChIJcwMa3HKpQjQRDEzzZzYIn-M"; //新光三越站前
+
+        // Specify the fields to return.
+        List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.OPENING_HOURS, Place.Field.RATING);
+
+        // Construct a request object, passing the place ID and fields array.
+        FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeId, placeFields);
+
+        placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
+            Place place = response.getPlace();
+            Log.i(TAG, "Place found: name: " + place.getName()
+                                + ", opening hours: " + place.getOpeningHours()
+                                + ", rating: " + place.getRating());
+        }).addOnFailureListener((exception) -> {
+            if (exception instanceof ApiException) {
+                ApiException apiException = (ApiException) exception;
+                int statusCode = apiException.getStatusCode();
+                // Handle error with given status code.
+                Log.e(TAG, "Place not found: " + exception.getMessage());
+            }
+        });
     }
 
     @Override

@@ -13,8 +13,12 @@ android {
         multiDexEnabled true
     }
     buildTypes {
+        debug {
+            buildConfigField 'String', "ApiKey", GooglePlace_ApiKey
+        }
         release {
             minifyEnabled false
+            buildConfigField 'String', "ApiKey", GooglePlace_ApiKey
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -53,4 +57,6 @@ dependencies {
     implementation("com.tomtom.online:sdk-maps-static-image:2.4101")
     //extencion library for driving features
     implementation("com.tomtom.online:sdk-maps-driving-extensions:2.4101")
+
+    implementation('com.google.android.libraries.places:places:2.0.0')
 }
