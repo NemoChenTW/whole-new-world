@@ -1,4 +1,7 @@
-package com.taipei.ttbootcamp.MyDriveAPI;
+package com.taipei.ttbootcamp.interfaces;
+
+import com.taipei.ttbootcamp.MyDriveAPI.Itinerary;
+import com.taipei.ttbootcamp.MyDriveAPI.PublicItinerary;
 
 import java.util.List;
 
@@ -7,7 +10,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
-public interface MyDriveApiService {
+public interface IMyDriveApiService {
     String BASE_URL = "https://api.mydrive.tomtom.com";
 
 

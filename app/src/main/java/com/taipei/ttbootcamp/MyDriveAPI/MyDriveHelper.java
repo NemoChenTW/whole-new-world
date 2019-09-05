@@ -2,8 +2,7 @@ package com.taipei.ttbootcamp.MyDriveAPI;
 
 import android.util.Log;
 
-import com.taipei.ttbootcamp.Entities.GoogleGeocode;
-import com.taipei.ttbootcamp.MainActivity;
+import com.taipei.ttbootcamp.interfaces.IMyDriveApiService;
 import com.tomtom.online.sdk.common.location.LatLng;
 
 import java.util.List;
@@ -45,10 +44,10 @@ public class MyDriveHelper {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(MyDriveApiService.BASE_URL)
+                .baseUrl(IMyDriveApiService.BASE_URL)
                 .build();
 
-        MyDriveApiService service = retrofit.create(MyDriveApiService.class);
+        IMyDriveApiService service = retrofit.create(IMyDriveApiService.class);
 
         return service.getPublicItineries(latLngString, aTagName, maxResultString);
     }
@@ -56,10 +55,10 @@ public class MyDriveHelper {
     public static void getItineraryInfo(String aItineraryID) {
         Retrofit retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(MyDriveApiService.BASE_URL)
+                .baseUrl(IMyDriveApiService.BASE_URL)
                 .build();
 
-        MyDriveApiService service = retrofit.create(MyDriveApiService.class);
+        IMyDriveApiService service = retrofit.create(IMyDriveApiService.class);
 
         service.getItinerary(aItineraryID).enqueue(new Callback<Itinerary>() {
             @Override
