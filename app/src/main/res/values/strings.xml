@@ -16,5 +16,6 @@
     <string name="provide_recommend_string">Here is the recommend trip for you.</string>
     <string name="trash_trip_string">OK, I will take you to Vladivostok.</string>
     <string name="dogs_out_string">Woof, woof, woof, woof, woof.</string>
+    <string name="ic_pin_description">pin icon</string>
 
 </resources>

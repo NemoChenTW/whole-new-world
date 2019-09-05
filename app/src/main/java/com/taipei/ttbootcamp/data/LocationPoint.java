@@ -19,6 +19,14 @@ public class LocationPoint {
         return mName;
     }
 
+    public String getFirstName() {
+        try {
+            return mName.split(",")[0];
+        } catch (Exception e) {
+            return mName;
+        }
+    }
+
     public void setName(String name) {
         mName = name;
     }

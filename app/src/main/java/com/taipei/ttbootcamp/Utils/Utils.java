@@ -5,8 +5,9 @@ import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
-public class Utlis {
+public class Utils {
     public static ArrayList<FuzzySearchResult> toFuzzySearchResultArraylist(ImmutableList<FuzzySearchResult> searchResults) {
         ArrayList<FuzzySearchResult> resultList = new ArrayList<>();
         for (FuzzySearchResult fuzzySearchResult : searchResults) {
@@ -21,5 +22,12 @@ public class Utlis {
             resultList.add(fresult.getPosition());
         }
         return resultList;
+    }
+
+    public static String secondToHourMinute(int seconds) {
+        int hours = seconds / 3600;
+        int minutes = (seconds % 3600) / 60;
+
+        return String.format(Locale.ENGLISH,"%02d:%02d", hours, minutes);
     }
 }

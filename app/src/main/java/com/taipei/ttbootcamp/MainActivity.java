@@ -1,5 +1,6 @@
 package com.taipei.ttbootcamp;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +8,9 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -30,6 +34,7 @@ import com.taipei.ttbootcamp.controller.TripController;
 import com.taipei.ttbootcamp.implementations.MapElementDisplayer;
 import com.taipei.ttbootcamp.interfaces.ITripOptimizer;
 import com.taipei.ttbootcamp.interfaces.MainActivityView;
+import com.taipei.ttbootcamp.resultView.ResultAdapter;
 import com.taipei.ttbootcamp.ttsengine.TTSEngine;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.map.MapFragment;
@@ -82,6 +87,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     private TextView mCurrentPosition;
 
     private BootcampBroadcastReceiver mBootcampBroadcastReceiver = new BootcampBroadcastReceiver();
+
+    TripData tripData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -254,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
                     mTripOptimizer.setOptimizeResultListener(mTripController);
 
                     // Plan test trip
-                    TripData tripData = new TripData(new LatLng(25.046570, 121.515313));
+                    tripData = new TripData(new LatLng(25.046570, 121.515313));
                     mTripController.PlanTrip(tripData, POIGenerator.POITYPE.MUSEUM, 100000);
                 }
             };
@@ -304,6 +311,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         mDestinationBtn = findViewById(R.id.btn_balloon_destination);
         mAddWaypointBtn = findViewById(R.id.btn_balloon_waypoint);
         mClearWaypointBtn = findViewById(R.id.btn_balloon_clearwaypoint);
+        ImageButton imageButton = findViewById(R.id.result_button);
+        imageButton.setOnClickListener((View v) -> {
+            setResultDialog();
+        });
+
 
         mDepartureBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -348,6 +360,22 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     @Override
     public void hideMarkerFeatureMenu() {
         displayMarkerFeatureMenu(false);
+    }
+
+    void setResultDialog() {
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_plan_result, null);
+        RecyclerView recyclerView = view.findViewById(R.id.rc_dialog);
+        ResultAdapter dialogAddSubPrivateTopicRecyclerViewAdapter = new ResultAdapter(tripData);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(dialogAddSubPrivateTopicRecyclerViewAdapter);
+        dialogAddSubPrivateTopicRecyclerViewAdapter.setOnItemClickListener((View v, int position) -> {
+
+        });
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog mAlertDialog = builder.create();
+        mAlertDialog.show();
+        mAlertDialog.getWindow().setContentView(view);
     }
 
     public class BootcampBroadcastReceiver extends BroadcastReceiver {

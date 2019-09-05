@@ -2,7 +2,7 @@ package com.taipei.ttbootcamp.PoiGenerator;
 
 import android.util.Log;
 
-import com.taipei.ttbootcamp.Utils.Utlis;
+import com.taipei.ttbootcamp.Utils.Utils;
 import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
 import com.tomtom.online.sdk.common.location.LatLngAcc;
@@ -68,7 +68,7 @@ public class POIGenerator {
                         for (FuzzySearchResult fuzzySearchResult : fuzzySearchResponse.getResults()) {
                             Log.d(TAG, "fuzzySearchResult: " + fuzzySearchResult.toString());
                         }
-                        tripData.setFuzzySearchResults(Utlis.toFuzzySearchResultArraylist(fuzzySearchResponse.getResults()));
+                        tripData.setFuzzySearchResults(Utils.toFuzzySearchResultArraylist(fuzzySearchResponse.getResults()));
                         searchResultCallback.onPOISearchResult(tripData);
                     }
 
