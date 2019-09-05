@@ -2,9 +2,12 @@ package com.taipei.ttbootcamp.controller;
 
 import android.util.Log;
 
+import com.taipei.ttbootcamp.BuildConfig;
+import com.taipei.ttbootcamp.Entities.GoogleGeocode;
 import com.taipei.ttbootcamp.PoiGenerator.POIGenerator;
 import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
 import com.taipei.ttbootcamp.data.TripData;
+import com.taipei.ttbootcamp.interfaces.IGoogleApiService;
 import com.taipei.ttbootcamp.interfaces.IMapElementDisplay;
 import com.taipei.ttbootcamp.interfaces.IOptimizeResultListener;
 import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
@@ -20,6 +23,10 @@ import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
 import java.util.ArrayList;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class TripController implements IPOISearchResult, IPlanResultListener,
                                         IMapElementDisplay.IPositionUpdateListener,
                                         IOptimizeResultListener {
@@ -27,13 +34,15 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
 
     private RoutingApi mRoutingApi;
     private SearchApi mSearchApi;
+    private IGoogleApiService mGoogleApiService;
     private IMapElementDisplay mMapElementDisplay;
     private RoutePlanner mRoutePlanner;
     private ITripOptimizer mTripOptimizer;
 
-    public TripController(RoutingApi routingApi, SearchApi searchApi, IMapElementDisplay mapElementDisplay, ITripOptimizer tripOptimizer) {
+    public TripController(RoutingApi routingApi, SearchApi searchApi, IGoogleApiService googleApiService, IMapElementDisplay mapElementDisplay, ITripOptimizer tripOptimizer) {
         mRoutingApi = routingApi;
         mSearchApi = searchApi;
+        mGoogleApiService = googleApiService;
         mMapElementDisplay = mapElementDisplay;
         mRoutePlanner = new RoutePlanner(mRoutingApi, this);
         mMapElementDisplay.addPositionUpdateListener(this);

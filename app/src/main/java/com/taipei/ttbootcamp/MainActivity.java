@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -20,18 +19,18 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.taipei.ttbootcamp.PoiGenerator.POIGenerator;
-import com.taipei.ttbootcamp.data.TripData;
-import com.taipei.ttbootcamp.implementations.TripOptimizer;
 import com.taipei.ttbootcamp.Presenter.MainActivityPresenter;
 import com.taipei.ttbootcamp.controller.TripController;
+import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.implementations.MapElementDisplayer;
+import com.taipei.ttbootcamp.implementations.TripOptimizer;
+import com.taipei.ttbootcamp.interfaces.IGoogleApiService;
 import com.taipei.ttbootcamp.interfaces.ITripOptimizer;
 import com.taipei.ttbootcamp.interfaces.MainActivityView;
 import com.taipei.ttbootcamp.resultView.ResultAdapter;
@@ -56,6 +55,13 @@ import java.util.Locale;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
 
 public class MainActivity extends AppCompatActivity implements MainActivityView {
     static private final String TAG = "MainActivity";
@@ -64,6 +70,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     private TomtomMap mTomtomMap;
     private RoutingApi mRoutingApi;
     private SearchApi mSearchApi;
+
+    // Google API
+    private IGoogleApiService mGoogleApiService;
 
     private ITripOptimizer mTripOptimizer;
     private MainActivityPresenter mMainActivityPresenter;
@@ -99,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
         initUIViews();
         initTomTomServices();
+        initialGoogleApiService();
         initialGooglePlace();
 
         MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
@@ -114,19 +124,46 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         mTTSEngine = new TTSEngine(this);
     }
 
+    private void initialGoogleApiService() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl(IGoogleApiService.BASE_URL)
+                .build();
+        mGoogleApiService = retrofit.create(IGoogleApiService.class);
+    }
     private void initialGooglePlace() {
         // Initialize the SDK
         Places.initialize(getApplicationContext(), BuildConfig.ApiKey);
 
         // Create a new Places client instance
         PlacesClient placesClient = Places.createClient(this);
-        requestPlaceDetails(placesClient);
+//        requestPlaceDetails(placesClient);
     }
 
-    private void requestPlaceDetails(final PlacesClient placesClient) {
-        // Define a Place ID.
-        String placeId = "ChIJcwMa3HKpQjQRDEzzZzYIn-M"; //新光三越站前
+//    private void requestPlaceDetails(final PlacesClient placesClient) {
+//        service.getGeocode("新光三越站前", BuildConfig.ApiKey).enqueue(new Callback<GoogleGeocode>() {
+//            @Override
+//            public void onResponse(Call<GoogleGeocode> call, Response<GoogleGeocode> response) {
+//                GoogleGeocode googleGeocode = response.body();
+//                if (!googleGeocode.getResults().isEmpty()) {
+//                    String placeId = googleGeocode.getResults().get(0).getPlace_id();
+//                    if (placeId.isEmpty()) {
+//                        Log.e(TAG, "PlaceId is empty");
+//                        return;
+//                    } else {
+//                        requestPlaceDetails(placesClient, placeId);
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<GoogleGeocode> call, Throwable t) {
+//
+//            }
+//        });
+//    }
 
+    private void requestPlaceDetails(final PlacesClient placesClient, final String placeId) {
         // Specify the fields to return.
         List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.OPENING_HOURS, Place.Field.RATING);
 
@@ -256,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), mTomtomMap);
                     mMainActivityPresenter.initMainActivityPresenter(mMapElementDisplayer, mSearchApi);
                     mTripOptimizer = new TripOptimizer(mSearchApi, mRoutingApi);
-                    mTripController = new TripController(mRoutingApi, mSearchApi, mMapElementDisplayer, mTripOptimizer);
+                    mTripController = new TripController(mRoutingApi, mSearchApi, mGoogleApiService, mMapElementDisplayer, mTripOptimizer);
 
                     mTripOptimizer.setOptimizeResultListener(mTripController);
 
