@@ -3,6 +3,7 @@ package com.taipei.ttbootcamp;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -348,6 +349,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         mDestinationBtn = findViewById(R.id.btn_balloon_destination);
         mAddWaypointBtn = findViewById(R.id.btn_balloon_waypoint);
         mClearWaypointBtn = findViewById(R.id.btn_balloon_clearwaypoint);
+        // TODO: move to interface
         ImageButton imageButton = findViewById(R.id.result_button);
         imageButton.setOnClickListener((View v) -> {
             setResultDialog();
@@ -399,6 +401,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         displayMarkerFeatureMenu(false);
     }
 
+    // TODO: move to interface
     void setResultDialog() {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_plan_result, null);
         RecyclerView recyclerView = view.findViewById(R.id.rc_dialog);
@@ -413,7 +416,38 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         AlertDialog mAlertDialog = builder.create();
         mAlertDialog.show();
         mAlertDialog.getWindow().setContentView(view);
+        // hard coded temporarily, 0: skip, 1: add, -1: remove
+        byte skipAddRemove = 1;
+
+        if (skipAddRemove != 0) {
+            showAddOrRemoveDialog(skipAddRemove == 1);
+        }
     }
+
+    void showAddOrRemoveDialog(boolean isAdding) {
+        String message = isAdding ? getString(R.string.add_lunch_restaurant) : getString(R.string.remove_poi);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setTitle("Title");
+        dialogBuilder.setMessage(message);
+
+        dialogBuilder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        dialogBuilder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        AlertDialog dialog = dialogBuilder.create();
+        dialog.show();
+    }
+    // end of TODO
 
     public class BootcampBroadcastReceiver extends BroadcastReceiver {
         static private final String TAG = "BootcampBroadcast";
