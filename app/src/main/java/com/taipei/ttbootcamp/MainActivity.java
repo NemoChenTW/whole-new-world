@@ -25,6 +25,7 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.taipei.ttbootcamp.MyDriveAPI.MyDriveHelper;
 import com.taipei.ttbootcamp.PoiGenerator.POIGenerator;
 import com.taipei.ttbootcamp.Presenter.MainActivityPresenter;
 import com.taipei.ttbootcamp.controller.TripController;
@@ -111,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         initTomTomServices();
         initialGoogleApiService();
         initialGooglePlace();
+        //requestMyDrivePublicItineraries();
 
         MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         mapFragment.getAsyncMap(onMapReadyCallback);
@@ -163,6 +165,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 //            }
 //        });
 //    }
+
+    private void requestMyDrivePublicItineraries() {
+        LatLng latlng = new LatLng(45.413441, 5.873900);
+        MyDriveHelper.getNearestPublicItineraries(latlng, "tomtomcommunityroutes", 10);
+
+        String itineraryID = "7771c937-fb7d-4043-ae4e-c6737e27b82c";
+        MyDriveHelper.getItineraryInfo(itineraryID);
+    }
 
     private void requestPlaceDetails(final PlacesClient placesClient, final String placeId) {
         // Specify the fields to return.
@@ -298,9 +308,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
                     mTripOptimizer.setOptimizeResultListener(mTripController);
 
-                    // Plan test trip
-                    tripData = new TripData(new LatLng(25.046570, 121.515313));
-                    mTripController.PlanTrip(tripData, POIGenerator.POITYPE.MUSEUM, 100000);
+                    //TripData tripData = new TripData(new LatLng(25.046570, 121.515313));
+                    TripData tripData = new TripData(new LatLng(49.44239, 1.09846));
+                    //mTripController.PlanTrip(tripData, POIGenerator.POITYPE.MUSEUM, 100000);
+                    mTripController.PlanTripFromMyDrive(tripData, new LatLng(49.44239, 1.09846), "tomtomroadtrips,historical");
                 }
             };
 

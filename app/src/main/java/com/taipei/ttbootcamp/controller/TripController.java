@@ -6,6 +6,7 @@ import com.taipei.ttbootcamp.BuildConfig;
 import com.taipei.ttbootcamp.Entities.GoogleGeocode;
 import com.taipei.ttbootcamp.PoiGenerator.POIGenerator;
 import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
+import com.taipei.ttbootcamp.data.LocationPoint;
 import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IGoogleApiService;
 import com.taipei.ttbootcamp.interfaces.IMapElementDisplay;
@@ -52,7 +53,9 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
     @Override
     public void onPOISearchResult(TripData tripData) {
         ArrayList<FuzzySearchResult> searchResult = tripData.getFuzzySearchResults();
-        tripData.setEndPoint(new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation()));
+        //tripData.setEndPoint(new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation()));
+        LocationPoint lastWayPoint = tripData.getWayPoints().get(tripData.getWayPoints().size() - 1);
+        tripData.setEndPoint(new LatLng(lastWayPoint.getPosition().toLocation()));
         mRoutePlanner.planRoute(tripData, true);
     }
 
@@ -65,8 +68,13 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
         POIGenerator.queryWithCategory(mSearchApi, tripData, poitype, radius, this);
     }
 
+    public void PlanTripFromMyDrive(TripData tripData, LatLng currentLatLng, String tagName) {
+        POIGenerator.queryWithMyDriveAPI(currentLatLng, tagName, 1, tripData, this);
+    }
+
     @Override
     public void onRoutePlanComplete(RouteResponse routeResult, TripData tripData, boolean needOptimize) {
+        needOptimize = false;
         if (needOptimize) {
             tripData.setFuzzySearchResultTravelTimes(prepareOptimizeData(routeResult, tripData.getFuzzySearchResults()));
             mTripOptimizer.optimizeTrip(tripData);

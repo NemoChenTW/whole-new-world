@@ -48,10 +48,11 @@ public class TripOptimizer implements ITripOptimizer {
     }
 
     private void optimizeWithPetrolStation(TripData tripData) {
-        ArrayList<FuzzySearchResult> storedSearchResult = tripData.getFuzzySearchResults();
-        FuzzySearchResult targetLocation = storedSearchResult.get(storedSearchResult.size() / 2);
-        Log.d(TAG, "targetLocation= " + targetLocation.getId());
-        LatLng targetSearchCenter = targetLocation.getPosition();
+        //ArrayList<FuzzySearchResult> storedSearchResult = tripData.getFuzzySearchResults();
+        //FuzzySearchResult targetLocation = storedSearchResult.get(storedSearchResult.size() / 2);
+        //Log.d(TAG, "targetLocation= " + targetLocation.getId());
+
+        LatLng targetSearchCenter = tripData.getWayPoints().get(tripData.getWayPoints().size() / 2).getPosition();
 
         mSearchApi.search(new FuzzySearchQueryBuilder("petrol")
                 .withPreciseness(new LatLngAcc(targetSearchCenter, 100000))
