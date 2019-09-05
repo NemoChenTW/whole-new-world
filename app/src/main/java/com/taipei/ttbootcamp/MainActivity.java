@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         initTomTomServices();
         initialGoogleApiService();
         initialGooglePlace();
-        requestMyDrivePublicItineraries();
+        //requestMyDrivePublicItineraries();
 
         MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         mapFragment.getAsyncMap(onMapReadyCallback);
@@ -305,8 +305,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
                     mTripOptimizer.setOptimizeResultListener(mTripController);
 
                     // Plan test trip
-                    TripData tripData = new TripData(new LatLng(25.046570, 121.515313));
-                    mTripController.PlanTrip(tripData, POIGenerator.POITYPE.MUSEUM, 100000);
+                    //TripData tripData = new TripData(new LatLng(25.046570, 121.515313));
+                    TripData tripData = new TripData(new LatLng(49.44239, 1.09846));
+                    //mTripController.PlanTrip(tripData, POIGenerator.POITYPE.MUSEUM, 100000);
+                    mTripController.PlanTripFromMyDrive(tripData, new LatLng(49.44239, 1.09846), "tomtomroadtrips,historical");
                 }
             };
 

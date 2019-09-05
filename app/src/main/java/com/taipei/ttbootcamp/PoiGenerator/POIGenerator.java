@@ -5,6 +5,7 @@ import android.util.Log;
 import com.taipei.ttbootcamp.MyDriveAPI.MyDriveHelper;
 import com.taipei.ttbootcamp.MyDriveAPI.PublicItinerary;
 import com.taipei.ttbootcamp.Utils.Utlis;
+import com.taipei.ttbootcamp.data.LocationPoint;
 import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
 import com.tomtom.online.sdk.common.location.LatLng;
@@ -87,7 +88,7 @@ public class POIGenerator {
                 });
     }
 
-    public static void queryWithMyDriveAPI(LatLng aLatLng, String aTagName, int aMaxResult, TripData tripData, IPOISearchResult searchResult) {
+    public static void queryWithMyDriveAPI(LatLng aLatLng, String aTagName, int aMaxResult, TripData tripData, IPOISearchResult searchResultCallback) {
         MyDriveHelper.getPublicItinerariesQuery(aLatLng, aTagName, aMaxResult).enqueue(new Callback<List<PublicItinerary>>() {
             @Override
             public void onResponse(Call<List<PublicItinerary>> call, Response<List<PublicItinerary>> response) {
@@ -95,6 +96,38 @@ public class POIGenerator {
                 Log.e("MyDrive", "Public Itinerary results.");
                 if (!publicItineraries.isEmpty()) {
                     PublicItinerary itinerary = publicItineraries.get(0);
+
+                    if (itinerary == null) {
+                        Log.e(TAG, "Cannot convert MyDrive Itinerary.");
+                        return;
+                    }
+
+                    tripData.removeWaypoints();
+
+                    Log.e("MyDrive", "Itinerary ID: " + itinerary.getId() + ", Name: " + itinerary.getName());
+                    int i = 0;
+                    for (PublicItinerary.SegmentsBean segment : itinerary.getSegments()) {
+                        Log.e("MyDrive", "Segment Size: " + itinerary.getSegments().size());
+                        for (PublicItinerary.SegmentsBean.WaypointsBean waypoint : segment.getWaypoints()) {
+                            Log.e("MyDrive", "waypoint Size: " + segment.getWaypoints().size());
+
+                            //if (waypoint.getLocationInfo().getPoiName() != null
+                            //        && !waypoint.getLocationInfo().getPoiName().isEmpty()) {
+                            //    Log.e("MyDrive", "Add POI Name: " + waypoint.getLocationInfo().getPoiName());
+                            if (waypoint.getLocationInfo() != null && waypoint.getLocationInfo().getPoint() != null) {
+                                if (waypoint.getLocationInfo().getPoiName() != null && !waypoint.getLocationInfo().getPoiName().isEmpty()) {
+                                    Log.e("MyDrive", "Add WP: " + i + " Name: " + waypoint.getLocationInfo().getPoiName());
+                                    ++i;
+                                    tripData.addWaypoints(new LocationPoint(
+                                            new LatLng(waypoint.getLocationInfo().getPoint().get(0)
+                                                    , waypoint.getLocationInfo().getPoint().get(1))
+                                                , waypoint.getLocationInfo().getPoiName()));
+                                }
+                            }
+                            //}
+                        }
+                    }
+                    searchResultCallback.onPOISearchResult(tripData);
                 }
                 else {
                     Log.e("MyDrive", "Empty public Itinerary.");
