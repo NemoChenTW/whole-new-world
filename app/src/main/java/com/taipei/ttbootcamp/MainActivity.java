@@ -30,6 +30,7 @@ import com.taipei.ttbootcamp.controller.TripController;
 import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.implementations.MapElementDisplayer;
 import com.taipei.ttbootcamp.implementations.TripOptimizer;
+import com.taipei.ttbootcamp.interfaces.IGoogleApiService;
 import com.taipei.ttbootcamp.interfaces.ITripOptimizer;
 import com.taipei.ttbootcamp.interfaces.MainActivityView;
 import com.taipei.ttbootcamp.ttsengine.TTSEngine;
@@ -69,6 +70,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     private RoutingApi mRoutingApi;
     private SearchApi mSearchApi;
 
+    // Google API
+    private IGoogleApiService mGoogleApiService;
+
     private ITripOptimizer mTripOptimizer;
     private MainActivityPresenter mMainActivityPresenter;
     private MapElementDisplayer mMapElementDisplayer;
@@ -101,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
         initUIViews();
         initTomTomServices();
+        initialGoogleApiService();
         initialGooglePlace();
 
         MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
@@ -116,49 +121,44 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         mTTSEngine = new TTSEngine(this);
     }
 
+    private void initialGoogleApiService() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl(IGoogleApiService.BASE_URL)
+                .build();
+        mGoogleApiService = retrofit.create(IGoogleApiService.class);
+    }
     private void initialGooglePlace() {
         // Initialize the SDK
         Places.initialize(getApplicationContext(), BuildConfig.ApiKey);
 
         // Create a new Places client instance
         PlacesClient placesClient = Places.createClient(this);
-        requestPlaceDetails(placesClient);
+//        requestPlaceDetails(placesClient);
     }
 
-    public interface ApiService {
-        String BASE_URL = "https://maps.googleapis.com";
-        @GET("maps/api/geocode/json")
-        Call<GoogleGeocode> getGeocode(@Query("address") String address, @Query("key") String key);
-    }
-
-    Retrofit retrofit = new Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .baseUrl(ApiService.BASE_URL)
-            .build();
-    ApiService service = retrofit.create(ApiService.class);
-
-    private void requestPlaceDetails(final PlacesClient placesClient) {
-        service.getGeocode("新光三越站前", BuildConfig.ApiKey).enqueue(new Callback<GoogleGeocode>() {
-            @Override
-            public void onResponse(Call<GoogleGeocode> call, Response<GoogleGeocode> response) {
-                GoogleGeocode googleGeocode = response.body();
-                if (!googleGeocode.getResults().isEmpty()) {
-                    String placeId = googleGeocode.getResults().get(0).getPlace_id();
-                    if (placeId.isEmpty()) {
-                        Log.e(TAG, "PlaceId is empty");
-                        return;
-                    } else {
-                        requestPlaceDetails(placesClient, placeId);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<GoogleGeocode> call, Throwable t) {
-
-            }
-        });
-    }
+//    private void requestPlaceDetails(final PlacesClient placesClient) {
+//        service.getGeocode("新光三越站前", BuildConfig.ApiKey).enqueue(new Callback<GoogleGeocode>() {
+//            @Override
+//            public void onResponse(Call<GoogleGeocode> call, Response<GoogleGeocode> response) {
+//                GoogleGeocode googleGeocode = response.body();
+//                if (!googleGeocode.getResults().isEmpty()) {
+//                    String placeId = googleGeocode.getResults().get(0).getPlace_id();
+//                    if (placeId.isEmpty()) {
+//                        Log.e(TAG, "PlaceId is empty");
+//                        return;
+//                    } else {
+//                        requestPlaceDetails(placesClient, placeId);
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<GoogleGeocode> call, Throwable t) {
+//
+//            }
+//        });
+//    }
 
     private void requestPlaceDetails(final PlacesClient placesClient, final String placeId) {
         // Specify the fields to return.
@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), mTomtomMap);
                     mMainActivityPresenter.initMainActivityPresenter(mMapElementDisplayer, mSearchApi);
                     mTripOptimizer = new TripOptimizer(mSearchApi, mRoutingApi);
-                    mTripController = new TripController(mRoutingApi, mSearchApi, mMapElementDisplayer, mTripOptimizer);
+                    mTripController = new TripController(mRoutingApi, mSearchApi, mGoogleApiService, mMapElementDisplayer, mTripOptimizer);
 
                     mTripOptimizer.setOptimizeResultListener(mTripController);
 
