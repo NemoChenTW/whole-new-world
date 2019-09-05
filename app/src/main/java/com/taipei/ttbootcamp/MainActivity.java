@@ -24,6 +24,7 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.taipei.ttbootcamp.Entities.GoogleGeocode;
+import com.taipei.ttbootcamp.MyDriveAPI.MyDriveHelper;
 import com.taipei.ttbootcamp.PoiGenerator.POIGenerator;
 import com.taipei.ttbootcamp.Presenter.MainActivityPresenter;
 import com.taipei.ttbootcamp.controller.TripController;
@@ -102,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         initUIViews();
         initTomTomServices();
         initialGooglePlace();
+        requestMyDrivePublicItineraries();
 
         MapFragment mapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         mapFragment.getAsyncMap(onMapReadyCallback);
@@ -158,6 +160,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
             }
         });
+    }
+
+    private void requestMyDrivePublicItineraries() {
+        LatLng latlng = new LatLng(45.413441, 5.873900);
+        MyDriveHelper.getNearestPublicItineraries(latlng, "tomtomcommunityroutes", 10);
+
+        String itineraryID = "7771c937-fb7d-4043-ae4e-c6737e27b82c";
+        MyDriveHelper.getItineraryInfo(itineraryID);
     }
 
     private void requestPlaceDetails(final PlacesClient placesClient, final String placeId) {
