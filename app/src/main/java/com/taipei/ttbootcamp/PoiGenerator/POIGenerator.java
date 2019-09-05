@@ -2,18 +2,26 @@ package com.taipei.ttbootcamp.PoiGenerator;
 
 import android.util.Log;
 
+import com.taipei.ttbootcamp.MyDriveAPI.MyDriveHelper;
+import com.taipei.ttbootcamp.MyDriveAPI.PublicItinerary;
 import com.taipei.ttbootcamp.Utils.Utlis;
 import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
+import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.common.location.LatLngAcc;
 import com.tomtom.online.sdk.search.SearchApi;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchQueryBuilder;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResponse;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
+import java.util.List;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class POIGenerator {
     static private final String TAG = "POIGenerator";
@@ -79,5 +87,24 @@ public class POIGenerator {
                 });
     }
 
+    public static void queryWithMyDriveAPI(LatLng aLatLng, String aTagName, int aMaxResult, TripData tripData, IPOISearchResult searchResult) {
+        MyDriveHelper.getPublicItinerariesQuery(aLatLng, aTagName, aMaxResult).enqueue(new Callback<List<PublicItinerary>>() {
+            @Override
+            public void onResponse(Call<List<PublicItinerary>> call, Response<List<PublicItinerary>> response) {
+                List<PublicItinerary> publicItineraries = response.body();
+                Log.e("MyDrive", "Public Itinerary results.");
+                if (!publicItineraries.isEmpty()) {
+                    PublicItinerary itinerary = publicItineraries.get(0);
+                }
+                else {
+                    Log.e("MyDrive", "Empty public Itinerary.");
+                }
+            }
 
+            @Override
+            public void onFailure(Call<List<PublicItinerary>> call, Throwable t) {
+                Log.e("MyDrive", "Fail Query public Itinerary.");
+            }
+        });
+    }
 }

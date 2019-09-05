@@ -17,17 +17,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MyDriveHelper {
     public static void getNearestPublicItineraries(LatLng aLatLng, String aTagName, int aMaxResult) {
 
-        String maxResultString = (aMaxResult <= 0) ? "1" : Integer.toString(aMaxResult);
-        String latLngString = aLatLng.getLatitudeAsString() + "," + aLatLng.getLongitudeAsString();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(MyDriveApiService.BASE_URL)
-                .build();
-
-        MyDriveApiService service = retrofit.create(MyDriveApiService.class);
-
-        service.getPublicItineries(latLngString, aTagName, maxResultString).enqueue(new Callback<List<PublicItinerary>>() {
+        getPublicItinerariesQuery(aLatLng, aTagName, aMaxResult).enqueue(new Callback<List<PublicItinerary>>() {
             @Override
             public void onResponse(Call<List<PublicItinerary>> call, Response<List<PublicItinerary>> response) {
                 List<PublicItinerary> publicItineraries = response.body();
@@ -47,6 +37,20 @@ public class MyDriveHelper {
                 Log.e("MyDrive", "Fail Query public Itinerary.");
             }
         });
+    }
+
+    public static Call<List<PublicItinerary>> getPublicItinerariesQuery(LatLng aLatLng, String aTagName, int aMaxResult) {
+        String maxResultString = (aMaxResult <= 0) ? "1" : Integer.toString(aMaxResult);
+        String latLngString = aLatLng.getLatitudeAsString() + "," + aLatLng.getLongitudeAsString();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl(MyDriveApiService.BASE_URL)
+                .build();
+
+        MyDriveApiService service = retrofit.create(MyDriveApiService.class);
+
+        return service.getPublicItineries(latLngString, aTagName, maxResultString);
     }
 
     public static void getItineraryInfo(String aItineraryID) {
