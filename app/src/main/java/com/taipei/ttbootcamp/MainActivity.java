@@ -309,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
                     mTripOptimizer.setOptimizeResultListener(mTripController);
 
                     //TripData tripData = new TripData(new LatLng(25.046570, 121.515313));
-                    TripData tripData = new TripData(new LatLng(49.44239, 1.09846));
+                    tripData = new TripData(new LatLng(49.44239, 1.09846));
                     //mTripController.PlanTrip(tripData, POIGenerator.POITYPE.MUSEUM, 100000);
                     mTripController.PlanTripFromMyDrive(tripData, new LatLng(49.44239, 1.09846), "tomtomroadtrips,historical");
                 }

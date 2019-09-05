@@ -30,7 +30,7 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ResultAdapter.ViewHolder holder, int position) {
         holder.destTextView.setText(mTripData.getWayPoints().get(position).getFirstName());
-        holder.timeTextView.setText(Utils.secondToHourMinute(mTripData.getFuzzySearchResultTravelTimes().get(position)));
+//        holder.timeTextView.setText(Utils.secondToHourMinute(mTripData.getFuzzySearchResultTravelTimes().get(position)));
         holder.itemView.setTag(position);
     }
 
