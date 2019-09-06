@@ -2,6 +2,12 @@ package com.taipei.ttbootcamp.controller;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.FetchPlaceResponse;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.taipei.ttbootcamp.BuildConfig;
 import com.taipei.ttbootcamp.Entities.GoogleGeocode;
 import com.taipei.ttbootcamp.PoiGenerator.POIGenerator;
@@ -14,6 +20,7 @@ import com.taipei.ttbootcamp.interfaces.IOptimizeResultListener;
 import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
 import com.taipei.ttbootcamp.interfaces.IPlanResultListener;
 import com.taipei.ttbootcamp.interfaces.ITripOptimizer;
+import com.taipei.ttbootcamp.wrapper.GmsTaskWrapper;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.routing.RoutingApi;
 import com.tomtom.online.sdk.routing.data.FullRoute;
@@ -23,10 +30,13 @@ import com.tomtom.online.sdk.search.SearchApi;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 public class TripController implements IPOISearchResult, IPlanResultListener,
                                         IMapElementDisplay.IPositionUpdateListener,
@@ -36,14 +46,16 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
     private RoutingApi mRoutingApi;
     private SearchApi mSearchApi;
     private IGoogleApiService mGoogleApiService;
+    private PlacesClient mGooglePlaceClient;
     private IMapElementDisplay mMapElementDisplay;
     private RoutePlanner mRoutePlanner;
     private ITripOptimizer mTripOptimizer;
 
-    public TripController(RoutingApi routingApi, SearchApi searchApi, IGoogleApiService googleApiService, IMapElementDisplay mapElementDisplay, ITripOptimizer tripOptimizer) {
+    public TripController(RoutingApi routingApi, SearchApi searchApi, IGoogleApiService googleApiService, PlacesClient googlePlaceClient, IMapElementDisplay mapElementDisplay, ITripOptimizer tripOptimizer) {
         mRoutingApi = routingApi;
         mSearchApi = searchApi;
         mGoogleApiService = googleApiService;
+        mGooglePlaceClient = googlePlaceClient;
         mMapElementDisplay = mapElementDisplay;
         mRoutePlanner = new RoutePlanner(mRoutingApi, this);
         mMapElementDisplay.addPositionUpdateListener(this);
@@ -54,9 +66,72 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
     public void onPOISearchResult(TripData tripData) {
         ArrayList<FuzzySearchResult> searchResult = tripData.getFuzzySearchResults();
         //tripData.setEndPoint(new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation()));
+        // TODO Add updateWaypointFromMyDirveResults
         LocationPoint lastWayPoint = tripData.getWayPoints().get(tripData.getWayPoints().size() - 1);
         tripData.setEndPoint(new LatLng(lastWayPoint.getPosition().toLocation()));
+        /* From search
+        tripData.setEndPoint(new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation()));
+        tripData.updateWaypointFromSearchResults();
+        */
+        updatePOIDetails(tripData);
         mRoutePlanner.planRoute(tripData, true);
+    }
+
+    private void updatePOIDetails(TripData tripData) {
+        for (LocationPoint point : tripData.getWayPoints()) {
+            Log.d(TAG, "Point= " + point.getName());
+        }
+        Observable.fromIterable(tripData.getWayPoints())
+                .concatMap(wayPoint -> mGoogleApiService.getGeocode(wayPoint.getName(), BuildConfig.ApiKey))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .concatMap(googleGeocode -> getPlaceResponseObservable(mGooglePlaceClient, googleGeocode)
+                                            .onErrorReturnItem(new FetchPlaceResponse() {
+                                                @NonNull
+                                                @Override
+                                                public Place getPlace() {
+                                                    return null;
+                                                }
+                                            }))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new DisposableObserver<FetchPlaceResponse>() {
+                    @Override
+                    public void onNext(FetchPlaceResponse fetchPlaceResponse) {
+                        Place place = fetchPlaceResponse.getPlace();
+                        if (place != null) {
+                            Log.d(TAG, "Place found: name: " + place.getName()
+                                    + ", rating: " + place.getRating());
+                        } else {
+                            Log.d(TAG, "Empty place");
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, "onError: " + e);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d(TAG, "onComplete");
+                    }
+                });
+    }
+    private Observable<FetchPlaceResponse> getPlaceResponseObservable(final PlacesClient placesClient, final GoogleGeocode googleGeocode) {
+        if (googleGeocode.getResults().isEmpty()) {
+            return Observable.error(new RuntimeException("Empty googleGeocode"));
+        }
+        String placeId = googleGeocode.getResults().get(0).getPlace_id();
+        String name = googleGeocode.getResults().get(0).getFormatted_address();
+        Log.d(TAG, "Place_id = " + placeId + ", addr= " + name);
+
+        // Specify the fields to return.
+        List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.OPENING_HOURS, Place.Field.RATING);
+        // Construct a request object, passing the place ID and fields array.
+        FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeId, placeFields);
+
+        return GmsTaskWrapper.asObservable(placesClient.fetchPlace(request));
     }
 
     public void planRoute(TripData tripData) {
