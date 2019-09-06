@@ -16,7 +16,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
-public class MainActivityPresenter {
+public class MainActivityPresenter implements MainActivityView {
     private static final String TAG = "MainActivityPresenter";
     private IMapElementDisplay mMapElementDisplay;
     private SearchApi mSearchApi;
@@ -94,4 +94,13 @@ public class MainActivityPresenter {
         }
     }
 
+    @Override
+    public void showMarkerFeatureMenu() {
+        mView.showMarkerFeatureMenu();
+    }
+
+    @Override
+    public void hideMarkerFeatureMenu() {
+        mView.hideMarkerFeatureMenu();
+    }
 }

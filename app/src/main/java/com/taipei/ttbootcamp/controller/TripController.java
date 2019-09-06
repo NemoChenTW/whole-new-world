@@ -15,6 +15,7 @@ import com.taipei.ttbootcamp.RoutePlanner.RoutePlanner;
 import com.taipei.ttbootcamp.data.LocationPoint;
 import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IGoogleApiService;
+import com.taipei.ttbootcamp.interfaces.IInteractionDialog;
 import com.taipei.ttbootcamp.interfaces.IMapElementDisplay;
 import com.taipei.ttbootcamp.interfaces.IOptimizeResultListener;
 import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
@@ -51,8 +52,9 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
     private IMapElementDisplay mMapElementDisplay;
     private RoutePlanner mRoutePlanner;
     private ITripOptimizer mTripOptimizer;
+    private IInteractionDialog mInteractionDialog;
 
-    public TripController(RoutingApi routingApi, SearchApi searchApi, IGoogleApiService googleApiService, PlacesClient googlePlaceClient, IMapElementDisplay mapElementDisplay, ITripOptimizer tripOptimizer) {
+    public TripController(RoutingApi routingApi, SearchApi searchApi, IGoogleApiService googleApiService, PlacesClient googlePlaceClient, IMapElementDisplay mapElementDisplay, ITripOptimizer tripOptimizer, IInteractionDialog interactionDialog) {
         mRoutingApi = routingApi;
         mSearchApi = searchApi;
         mGoogleApiService = googleApiService;
@@ -61,6 +63,7 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
         mRoutePlanner = new RoutePlanner(mRoutingApi, this);
         mMapElementDisplay.addPositionUpdateListener(this);
         mTripOptimizer = tripOptimizer;
+        mInteractionDialog = interactionDialog;
     }
 
     @Override

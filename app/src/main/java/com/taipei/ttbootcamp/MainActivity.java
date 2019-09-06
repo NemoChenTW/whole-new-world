@@ -35,6 +35,7 @@ import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.implementations.MapElementDisplayer;
 import com.taipei.ttbootcamp.implementations.TripOptimizer;
 import com.taipei.ttbootcamp.interfaces.IGoogleApiService;
+import com.taipei.ttbootcamp.interfaces.IInteractionDialog;
 import com.taipei.ttbootcamp.interfaces.ITripOptimizer;
 import com.taipei.ttbootcamp.interfaces.MainActivityView;
 import com.taipei.ttbootcamp.resultView.ResultAdapter;
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     private MapElementDisplayer mMapElementDisplayer;
     private TripController mTripController;
 
+    private IInteractionDialog mInteractionDialog;
     // View
     private PopupWindow mPopupWindow;
     private View mRootView;
@@ -97,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
     private BootcampBroadcastReceiver mBootcampBroadcastReceiver = new BootcampBroadcastReceiver();
 
-    TripData tripData;
+    TripData mTripData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,6 +125,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         initPopup();
         // Create TTS engine
         mTTSEngine = new TTSEngine(this);
+
+        // Initial InteractionDialog
+        mInteractionDialog = new InteractionDialog();
+        mInteractionDialog.initialDialog(this);
     }
 
     private void initialGoogleApiService() {
@@ -169,6 +175,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
             @Override
             public void onClick(View v) {
                 showPopup();
+                mMainActivityPresenter.hideMarkerFeatureMenu();
             }
         });
     }
@@ -196,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
             buttonList.add(view.findViewById(R.id.feeling_button_5));
 
             buttonList.get(0).setOnClickListener((View v) -> {
-                mTripController.PlanTrip(tripData, POIGenerator.POITYPE.MUSEUM, 100000);
+                mTripController.PlanTrip(mTripData, POIGenerator.POITYPE.MUSEUM, 100000);
             });
 
             buttonList.get(4).setOnClickListener((View v) -> {
@@ -216,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         dialog.setContentView(R.layout.dialog_my_drive);
         List<String> stringList = new ArrayList<>();  // here is list
         for (int i = 0; i < 5; i++) {
-            stringList.add(tripData.getMyDriveItineraries().get(i).getName());
+            stringList.add(mTripData.getMyDriveItineraries().get(i).getName());
         }
         RadioGroup rg = dialog.findViewById(R.id.radio_group);
 
@@ -230,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                mTripController.SelectMyDriveItineraryWithIndex(tripData, (checkedId - 1) % 5);
+                mTripController.SelectMyDriveItineraryWithIndex(mTripData, (checkedId - 1) % 5);
                 dialog.dismiss();
             }
         });
@@ -295,13 +302,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
                     mMapElementDisplayer = new MapElementDisplayer(getApplicationContext(), mTomtomMap);
                     mMainActivityPresenter.initMainActivityPresenter(mMapElementDisplayer, mSearchApi);
                     mTripOptimizer = new TripOptimizer(mSearchApi, mRoutingApi);
-                    mTripController = new TripController(mRoutingApi, mSearchApi, mGoogleApiService, mGooglePlacesClient, mMapElementDisplayer, mTripOptimizer);
+                    mTripController = new TripController(mRoutingApi, mSearchApi, mGoogleApiService, mGooglePlacesClient, mMapElementDisplayer, mTripOptimizer, mInteractionDialog);
 
                     mTripOptimizer.setOptimizeResultListener(mTripController);
 
-                    //TripData tripData = new TripData(new LatLng(25.046570, 121.515313));
-                    tripData = new TripData(new LatLng(49.44239, 1.09846));
-                    mTripController.PlanTripFromMyDrive(tripData, new LatLng(49.44239, 1.09846), "tomtomroadtrips,historical");
+                    //TripData mTripData = new TripData(new LatLng(25.046570, 121.515313));
+                    mTripData = new TripData(new LatLng(49.44239, 1.09846));
+                    //mTripController.PlanTrip(mTripData, POIGenerator.POITYPE.MUSEUM, 100000);
+                    mTripController.PlanTripFromMyDrive(mTripData, new LatLng(49.44239, 1.09846), "tomtomroadtrips,historical");
                 }
             };
 
@@ -353,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         // TODO: move to interface
         ImageButton imageButton = findViewById(R.id.result_button);
         imageButton.setOnClickListener((View v) -> {
-            setResultDialog();
+            mInteractionDialog.setResultDialog(mTripData, false);
         });
 
 
@@ -402,59 +410,65 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         displayMarkerFeatureMenu(false);
     }
 
-    // TODO: move to interface
-    void setResultDialog() {
-        View view = LayoutInflater.from(this).inflate(R.layout.dialog_plan_result, null);
-        ((TextView)view.findViewById(R.id.tv_title)).setText(tripData.getTripTitle());
-        RecyclerView recyclerView = view.findViewById(R.id.rc_dialog);
-        ResultAdapter dialogAddSubPrivateTopicRecyclerViewAdapter = new ResultAdapter(tripData);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(dialogAddSubPrivateTopicRecyclerViewAdapter);
-        dialogAddSubPrivateTopicRecyclerViewAdapter.setOnItemClickListener((View v, int position) -> {
+    public class InteractionDialog implements IInteractionDialog {
+        Context mContext;
 
-        });
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
-        AlertDialog mAlertDialog = builder.create();
-        mAlertDialog.show();
-        mAlertDialog.getWindow().setContentView(view);
-        mAlertDialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
+        @Override
+        public void initialDialog(Context context) {
+            mContext = context;
+        }
+
+        public void setResultDialog(TripData tripData, boolean isNeedRestaurent) {
+            View view = LayoutInflater.from(mContext).inflate(R.layout.dialog_plan_result, null);
+            ((TextView)view.findViewById(R.id.tv_title)).setText(tripData.getTripTitle());
+            RecyclerView recyclerView = view.findViewById(R.id.rc_dialog);
+            ResultAdapter dialogAddSubPrivateTopicRecyclerViewAdapter = new ResultAdapter(tripData);
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
+            recyclerView.setLayoutManager(linearLayoutManager);
+            recyclerView.setAdapter(dialogAddSubPrivateTopicRecyclerViewAdapter);
+            dialogAddSubPrivateTopicRecyclerViewAdapter.setOnItemClickListener((View v, int position) -> {
+
+            });
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext, R.style.AlertDialogCustom);
+            AlertDialog mAlertDialog = builder.create();
+            mAlertDialog.show();
+            mAlertDialog.getWindow().setContentView(view);
+            mAlertDialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
 //        mAlertDialog.getWindow().getDecorView().setBackgroundResource(android.R.color.transparent);
-        mAlertDialog.getWindow().setDimAmount(0.0f);
-        // hard coded temporarily, 0: skip, 1: add, -1: remove
-        byte skipAddRemove = 1;
+            mAlertDialog.getWindow().setDimAmount(0.0f);
+            // hard coded temporarily, 0: skip, 1: add, -1: remove
+            showAddOrRemoveDialog(isNeedRestaurent);
+        }
 
-        if (skipAddRemove != 0) {
-            showAddOrRemoveDialog(skipAddRemove == 1);
+        void showAddOrRemoveDialog(boolean isAdding) {
+
+            if (isAdding) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mContext, R.style.AlertDialogCustom);
+                String message = getString(R.string.add_lunch_restaurant);
+                dialogBuilder.setTitle("Title");
+                dialogBuilder.setMessage(message);
+
+                dialogBuilder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+
+                dialogBuilder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+
+                AlertDialog dialog = dialogBuilder.create();
+                dialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_pop);
+                dialog.getWindow().setDimAmount(0.0f);
+                dialog.show();
+            }
         }
     }
-
-    void showAddOrRemoveDialog(boolean isAdding) {
-        String message = isAdding ? getString(R.string.add_lunch_restaurant) : getString(R.string.remove_poi);
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
-        dialogBuilder.setTitle("Title");
-        dialogBuilder.setMessage(message);
-
-        dialogBuilder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-
-        dialogBuilder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-
-        AlertDialog dialog = dialogBuilder.create();
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_pop);
-        dialog.getWindow().setDimAmount(0.0f);
-        dialog.show();
-    }
-    // end of TODO
 
     public class BootcampBroadcastReceiver extends BroadcastReceiver {
         static private final String TAG = "BootcampBroadcast";
