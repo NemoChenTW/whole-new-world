@@ -103,6 +103,7 @@ public class POIGenerator {
                     }
 
                     tripData.removeWaypoints();
+                    tripData.setTripTitle(itinerary.getName());
 
                     Log.e("MyDrive", "Itinerary ID: " + itinerary.getId() + ", Name: " + itinerary.getName());
                     int i = 0;
