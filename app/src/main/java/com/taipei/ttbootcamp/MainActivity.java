@@ -156,27 +156,27 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         MyDriveHelper.getItineraryInfo(itineraryID);
     }
 
-    private void requestPlaceDetails(final PlacesClient placesClient, final String placeId) {
-        // Specify the fields to return.
-        List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.OPENING_HOURS, Place.Field.RATING);
-
-        // Construct a request object, passing the place ID and fields array.
-        FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeId, placeFields);
-
-        placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
-            Place place = response.getPlace();
-            Log.i(TAG, "Place found: name: " + place.getName()
-                                + ", opening hours: " + place.getOpeningHours()
-                                + ", rating: " + placeT.getRating());
-        }).addOnFailureListener((exception) -> {
-            if (exception instanceof ApiException) {
-                ApiException apiException = (ApiException) exception;
-                int statusCode = apiException.getStatusCode();
-                // Handle error with given status code.
-                Log.e(TAG, "Place not found: " + exception.getMessage());
-            }
-        });
-    }
+//    private void requestPlaceDetails(final PlacesClient placesClient, final String placeId) {
+//        // Specify the fields to return.
+//        List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.OPENING_HOURS, Place.Field.RATING);
+//
+//        // Construct a request object, passing the place ID and fields array.
+//        FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeId, placeFields);
+//
+//        placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
+//            Place place = response.getPlace();
+//            Log.i(TAG, "Place found: name: " + place.getName()
+//                                + ", opening hours: " + place.getOpeningHours()
+//                                + ", rating: " + placeT.getRating());
+//        }).addOnFailureListener((exception) -> {
+//            if (exception instanceof ApiException) {
+//                ApiException apiException = (ApiException) exception;
+//                int statusCode = apiException.getStatusCode();
+//                // Handle error with given status code.
+//                Log.e(TAG, "Place not found: " + exception.getMessage());
+//            }
+//        });
+//    }
 
     @Override
     protected void onResume() {
@@ -383,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         // TODO: move to interface
         ImageButton imageButton = findViewById(R.id.result_button);
         imageButton.setOnClickListener((View v) -> {
-            mInteractionDialog.setResultDialog(mTripData, false);
+            mInteractionDialog.setResultDialog(mTripData, false, 0);
         });
 
 
@@ -435,14 +435,19 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     public class InteractionDialog implements IInteractionDialog {
         Context mContext;
 
-        IOptimizeResultCallBack optimizeResult;
+        IOptimizeResultCallBack optimizeResult = new IOptimizeResultCallBack() {
+            @Override
+            public void optimizeWithRestaurant(TripData tripData, boolean isOptimize, int restaurantIdx) {
+
+            }
+        };
 
         @Override
         public void initialDialog(Context context) {
             mContext = context;
         }
 
-        public void setResultDialog(TripData tripData, boolean isNeedRestaurent) {
+        public void setResultDialog(TripData tripData, boolean isNeedRestaurent, int idx) {
             View view = LayoutInflater.from(mContext).inflate(R.layout.dialog_plan_result, null);
             ((TextView)view.findViewById(R.id.tv_title)).setText(tripData.getTripTitle());
             RecyclerView recyclerView = view.findViewById(R.id.rc_dialog);
@@ -461,14 +466,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 //        mAlertDialog.getWindow().getDecorView().setBackgroundResource(android.R.color.transparent);
             mAlertDialog.getWindow().setDimAmount(0.0f);
             // hard coded temporarily, 0: skip, 1: add, -1: remove
-            showAddOrRemoveDialog(isNeedRestaurent);
+            showAddOrRemoveDialog(isNeedRestaurent, idx);
         }
 
-        void showAddOrRemoveDialog(boolean isAdding) {
+        void showAddOrRemoveDialog(boolean isAdding, int idx) {
 
             if (isAdding) {
                 if (mTTSEngine != null) {
-                    mTTSEngine.speak("Do you want to add a restaurant during lunch time?", Locale.ENGLISH);
+//                    mTTSEngine.speak("Do you want to add a restaurant during lunch time?", Locale.ENGLISH);
                 }
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mContext, R.style.AlertDialogCustom);
                 String message = getString(R.string.add_lunch_restaurant);
@@ -478,14 +483,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
                 dialogBuilder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        optimizeResult.optimizeWithRestaurant(true);
+                        optimizeResult.optimizeWithRestaurant(mTripData, true, idx);
                     }
                 });
 
                 dialogBuilder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        optimizeResult.optimizeWithRestaurant(false);
+                        optimizeResult.optimizeWithRestaurant(mTripData, false, idx);
                     }
                 });
 

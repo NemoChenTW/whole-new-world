@@ -43,11 +43,11 @@ public class TripOptimizer implements ITripOptimizer {
     }
 
     public void optimizeTrip(TripData tripData, int index) {
-//        optimizeWithPetrolStation(tripData);
-        optimizeWithRestaurant(tripData, index);
+        optimizeWithPetrolStation(tripData);
+        optimizeWithRestaurants(tripData, index);
     }
 
-    private void optimizeWithRestaurant(TripData tripData, int index) {
+    private void optimizeWithRestaurants(TripData tripData, int index) {
         //ArrayList<FuzzySearchResult> storedSearchResult = tripData.getFuzzySearchResults();
         //FuzzySearchResult targetLocation = storedSearchResult.get(storedSearchResult.size() / 2);
         //Log.d(TAG, "targetLocation= " + targetLocation.getId());

@@ -4,5 +4,5 @@ import com.taipei.ttbootcamp.data.TripData;
 
 public interface ITripOptimizer {
     void setOptimizeResultListener(IOptimizeResultListener optimizeResultListener);
-    void optimizeTrip(TripData tripData);
+    void optimizeTrip(TripData tripData, int index);
 }
