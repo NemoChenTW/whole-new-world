@@ -52,6 +52,7 @@ public class TripOptimizer implements ITripOptimizer {
         //FuzzySearchResult targetLocation = storedSearchResult.get(storedSearchResult.size() / 2);
         //Log.d(TAG, "targetLocation= " + targetLocation.getId());
 
+        Log.e(TAG, "Optimize Petrol");
         LatLng targetSearchCenter = tripData.getWayPoints().get(tripData.getWayPoints().size() / 2).getPosition();
 
         mSearchApi.search(new FuzzySearchQueryBuilder("petrol")
@@ -69,6 +70,7 @@ public class TripOptimizer implements ITripOptimizer {
                 .subscribe(new DisposableSingleObserver<RouteResponse>() {
                     @Override
                     public void onSuccess(RouteResponse routeResult) {
+                        Log.e(TAG,"Petrol success");
                         submitOptimizeResult(tripData);
                     }
 
@@ -76,6 +78,8 @@ public class TripOptimizer implements ITripOptimizer {
                     public void onError(Throwable e) {
                         //handleApiError(e);
                         //clearMap();
+                        Log.e(TAG,"Petrol error");
+                        submitOptimizeResult(tripData);
                     }
                 });
     }
@@ -109,6 +113,7 @@ public class TripOptimizer implements ITripOptimizer {
     }
 
     private void submitOptimizeResult(TripData tripData) {
+        Log.e(TAG, "submitOptimizeResut");
         mOptimizeResultListener.onOptimizeResult(tripData);
     }
 }

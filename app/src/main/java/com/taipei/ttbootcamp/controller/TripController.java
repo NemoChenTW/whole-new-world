@@ -64,15 +64,18 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
 
     @Override
     public void onPOISearchResult(TripData tripData) {
-        ArrayList<FuzzySearchResult> searchResult = tripData.getFuzzySearchResults();
-        //tripData.setEndPoint(new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation()));
-        // TODO Add updateWaypointFromMyDirveResults
-        LocationPoint lastWayPoint = tripData.getWayPoints().get(tripData.getWayPoints().size() - 1);
-        tripData.setEndPoint(new LatLng(lastWayPoint.getPosition().toLocation()));
-        /* From search
-        tripData.setEndPoint(new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation()));
         tripData.updateWaypointFromSearchResults();
-        */
+        ArrayList<FuzzySearchResult> searchResult = tripData.getFuzzySearchResults();
+
+        if (searchResult != null && !searchResult.isEmpty()) {
+            tripData.setEndPoint(new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation()));
+        }
+        else {
+            // From MyDrive
+            LocationPoint lastWayPoint = tripData.getWayPoints().get(tripData.getWayPoints().size() - 1);
+            tripData.setEndPoint(new LatLng(lastWayPoint.getPosition().toLocation()));
+        }
+
         updatePOIDetails(tripData);
         mRoutePlanner.planRoute(tripData, true);
     }
@@ -149,7 +152,8 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
 
     @Override
     public void onRoutePlanComplete(RouteResponse routeResult, TripData tripData, boolean needOptimize) {
-        needOptimize = false;
+        Log.e(TAG, "onRoutePlanComplete: " + needOptimize);
+        //needOptimize = false;
         if (needOptimize) {
             tripData.setFuzzySearchResultTravelTimes(prepareOptimizeData(routeResult, tripData.getFuzzySearchResults()));
             mTripOptimizer.optimizeTrip(tripData);
@@ -192,8 +196,11 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
 
     @Override
     public void onOptimizeResult(TripData tripData) {
-        for (FuzzySearchResult result : tripData.getFuzzySearchResults()) {
-            Log.d(TAG, "onOptimizeResult= " + result.getPoi().getName());
+        Log.e(TAG, "On optimize result");
+        if (tripData.getFuzzySearchResults() != null) {
+            for (FuzzySearchResult result : tripData.getFuzzySearchResults()) {
+                Log.d(TAG, "onOptimizeResult= " + result.getPoi().getName());
+            }
         }
         mRoutePlanner.planRoute(tripData, false);
     }

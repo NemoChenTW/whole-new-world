@@ -100,7 +100,7 @@ public class TripData {
     }
 
     public boolean isWaypointsNeedUpdate() {
-        return isWaypointsNeedUpdate && (fuzzySearchResults != null && !fuzzySearchResults.isEmpty());
+        return isWaypointsNeedUpdate && (myDriveItinerary != null || (fuzzySearchResults != null && !fuzzySearchResults.isEmpty()));
     }
 
     public void updateWaypointFromSearchResults() {
@@ -137,6 +137,9 @@ public class TripData {
                     //}
                 }
             }
+        }
+        else {
+            Log.e(TAG, "No Search Results at all. No waypoint is updated.");
         }
     }
 
