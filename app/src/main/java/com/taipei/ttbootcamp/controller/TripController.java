@@ -19,6 +19,7 @@ import com.taipei.ttbootcamp.interfaces.IMapElementDisplay;
 import com.taipei.ttbootcamp.interfaces.IOptimizeResultListener;
 import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
 import com.taipei.ttbootcamp.interfaces.IPlanResultListener;
+import com.taipei.ttbootcamp.interfaces.IPublicItinerarySearchResultCallack;
 import com.taipei.ttbootcamp.interfaces.ITripOptimizer;
 import com.taipei.ttbootcamp.wrapper.GmsTaskWrapper;
 import com.tomtom.online.sdk.common.location.LatLng;
@@ -40,7 +41,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class TripController implements IPOISearchResult, IPlanResultListener,
                                         IMapElementDisplay.IPositionUpdateListener,
-                                        IOptimizeResultListener {
+                                        IPublicItinerarySearchResultCallack, IOptimizeResultListener {
     static private final String TAG = "TripController";
 
     private RoutingApi mRoutingApi;
@@ -147,7 +148,12 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
     }
 
     public void PlanTripFromMyDrive(TripData tripData, LatLng currentLatLng, String tagName) {
-        POIGenerator.queryWithMyDriveAPI(currentLatLng, tagName, 1, tripData, this);
+        POIGenerator.queryWithMyDriveAPI(currentLatLng, tagName, 5, tripData, this);
+    }
+
+    public void SelectMyDriveItineraryWithIndex(TripData tripData, int index) {
+        tripData.setSelectedItineraryIndex(index);
+        onPOISearchResult(tripData);
     }
 
     @Override
@@ -203,5 +209,14 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
             }
         }
         mRoutePlanner.planRoute(tripData, false);
+    }
+
+    @Override
+    public void onPublicItinerarySearchResult(TripData tripData) {
+        Log.e(TAG, "onPublicItinerarySearchResult Itineraries size: " + tripData.getMyDriveItineraries().size());
+        //tripData.getMyDriveItineraries().get(0).getName()
+
+        // UI call this
+        //SelectMyDriveItineraryWithIndex(tripData, 0);
     }
 }

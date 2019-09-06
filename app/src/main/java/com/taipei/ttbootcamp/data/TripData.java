@@ -19,12 +19,14 @@ public class TripData {
 
     private boolean isWaypointsNeedUpdate = false;
 
-    private PublicItinerary myDriveItinerary;
+    private ArrayList<PublicItinerary> myDriveItineraries;
+    private Integer selectedItineraryIndex;
 
     private String tripTitle;
 
     public TripData() {
         tripTitle = "";
+        selectedItineraryIndex = -1;
     }
 
     public TripData(final LatLng startPoint) {
@@ -100,7 +102,7 @@ public class TripData {
     }
 
     public boolean isWaypointsNeedUpdate() {
-        return isWaypointsNeedUpdate && (myDriveItinerary != null || (fuzzySearchResults != null && !fuzzySearchResults.isEmpty()));
+        return isWaypointsNeedUpdate && ((myDriveItineraries != null && !myDriveItineraries.isEmpty()) || (fuzzySearchResults != null && !fuzzySearchResults.isEmpty()));
     }
 
     public void updateWaypointFromSearchResults() {
@@ -111,13 +113,14 @@ public class TripData {
             this.fuzzySearchResults.forEach(result -> wayPoints.add(new LocationPoint(result.getPosition(), result.getPoi().getName())));
             wayPoints.remove(wayPoints.size() - 1);
         }
-        else if (this.myDriveItinerary != null) {
-            setTripTitle(this.myDriveItinerary.getName());
+        else if (this.myDriveItineraries != null && !this.myDriveItineraries.isEmpty() && selectedItineraryIndex >= 0 && selectedItineraryIndex < this.myDriveItineraries.size()) {
+            PublicItinerary myDriveItinerary = myDriveItineraries.get(selectedItineraryIndex);
+            setTripTitle(myDriveItinerary.getName());
 
-            Log.e("MyDrive", "Itinerary ID: " + this.myDriveItinerary.getId() + ", Name: " + this.myDriveItinerary.getName());
+            Log.e("MyDrive", "Itinerary ID: " + myDriveItinerary.getId() + ", Name: " + myDriveItinerary.getName());
             int i = 0;
-            for (PublicItinerary.SegmentsBean segment : this.myDriveItinerary.getSegments()) {
-                Log.e("MyDrive", "Segment Size: " + this.myDriveItinerary.getSegments().size());
+            for (PublicItinerary.SegmentsBean segment : myDriveItinerary.getSegments()) {
+                Log.e("MyDrive", "Segment Size: " + myDriveItinerary.getSegments().size());
                 for (PublicItinerary.SegmentsBean.WaypointsBean waypoint : segment.getWaypoints()) {
                     Log.e("MyDrive", "waypoint Size: " + segment.getWaypoints().size());
 
@@ -151,12 +154,29 @@ public class TripData {
         this.tripTitle = tripTitle;
     }
 
-    public PublicItinerary getMyDriveItinerary() {
-        return myDriveItinerary;
+    public ArrayList<PublicItinerary> getMyDriveItineraries() {
+        return myDriveItineraries;
     }
 
-    public void setMyDriveItinerary(PublicItinerary myDriveItinerary) {
-        this.myDriveItinerary = myDriveItinerary;
+    public void setMyDriveItineraries(ArrayList<PublicItinerary> myDriveItineraries) {
+        if (this.myDriveItineraries != null && !this.myDriveItineraries.isEmpty()) {
+            this.myDriveItineraries.clear();
+        }
+        this.myDriveItineraries = (ArrayList<PublicItinerary>) myDriveItineraries.clone();
+        selectedItineraryIndex = -1;
         isWaypointsNeedUpdate = true;
+    }
+
+    public Integer getSelectedItineraryIndex() {
+        return selectedItineraryIndex;
+    }
+
+    public void setSelectedItineraryIndex(Integer selectedItineraryIndex) {
+        if (selectedItineraryIndex >= 0 && selectedItineraryIndex < myDriveItineraries.size()) {
+            this.selectedItineraryIndex = selectedItineraryIndex;
+        }
+        else {
+            Log.e(TAG, "Invalid mydrive select index is set.");
+        }
     }
 }
