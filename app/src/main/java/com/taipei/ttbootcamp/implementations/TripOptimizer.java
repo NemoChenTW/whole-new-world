@@ -42,9 +42,42 @@ public class TripOptimizer implements ITripOptimizer {
         mOptimizeResultListener = optimizeResultListener;
     }
 
-    public void optimizeTrip(TripData tripData) {
-        optimizeWithPetrolStation(tripData);
+    public void optimizeTrip(TripData tripData, int index) {
+//        optimizeWithPetrolStation(tripData);
+        optimizeWithRestaurant(tripData, index);
+    }
 
+    private void optimizeWithRestaurant(TripData tripData, int index) {
+        //ArrayList<FuzzySearchResult> storedSearchResult = tripData.getFuzzySearchResults();
+        //FuzzySearchResult targetLocation = storedSearchResult.get(storedSearchResult.size() / 2);
+        //Log.d(TAG, "targetLocation= " + targetLocation.getId());
+
+        LatLng targetSearchCenter = tripData.getWayPoints().get(index).getPosition();
+
+        mSearchApi.search(new FuzzySearchQueryBuilder("restaurant")
+                .withPreciseness(new LatLngAcc(targetSearchCenter, 100000))
+                .withTypeAhead(true)
+                .withCategory(true)
+                .withLimit(1).build())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                // Plan route with search result
+                .flatMap(fuzzySearchResponse -> mRoutingApi.planRoute(
+                        createRouteQuery(tripData, fuzzySearchResponse)))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new DisposableSingleObserver<RouteResponse>() {
+                    @Override
+                    public void onSuccess(RouteResponse routeResult) {
+                        submitOptimizeResult(tripData);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        //handleApiError(e);
+                        //clearMap();
+                    }
+                });
     }
 
     private void optimizeWithPetrolStation(TripData tripData) {

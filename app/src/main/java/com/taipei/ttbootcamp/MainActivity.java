@@ -36,6 +36,7 @@ import com.taipei.ttbootcamp.implementations.MapElementDisplayer;
 import com.taipei.ttbootcamp.implementations.TripOptimizer;
 import com.taipei.ttbootcamp.interfaces.IGoogleApiService;
 import com.taipei.ttbootcamp.interfaces.IInteractionDialog;
+import com.taipei.ttbootcamp.interfaces.IOptimizeResultCallBack;
 import com.taipei.ttbootcamp.interfaces.ITripOptimizer;
 import com.taipei.ttbootcamp.interfaces.MainActivityView;
 import com.taipei.ttbootcamp.resultView.ResultAdapter;
@@ -155,7 +156,27 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         MyDriveHelper.getItineraryInfo(itineraryID);
     }
 
+    private void requestPlaceDetails(final PlacesClient placesClient, final String placeId) {
+        // Specify the fields to return.
+        List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.OPENING_HOURS, Place.Field.RATING);
 
+        // Construct a request object, passing the place ID and fields array.
+        FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeId, placeFields);
+
+        placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
+            Place place = response.getPlace();
+            Log.i(TAG, "Place found: name: " + place.getName()
+                                + ", opening hours: " + place.getOpeningHours()
+                                + ", rating: " + placeT.getRating());
+        }).addOnFailureListener((exception) -> {
+            if (exception instanceof ApiException) {
+                ApiException apiException = (ApiException) exception;
+                int statusCode = apiException.getStatusCode();
+                // Handle error with given status code.
+                Log.e(TAG, "Place not found: " + exception.getMessage());
+            }
+        });
+    }
 
     @Override
     protected void onResume() {
@@ -414,6 +435,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     public class InteractionDialog implements IInteractionDialog {
         Context mContext;
 
+        IOptimizeResultCallBack optimizeResult;
+
         @Override
         public void initialDialog(Context context) {
             mContext = context;
@@ -455,14 +478,14 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
                 dialogBuilder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        optimizeResult.optimizeWithRestaurant(true);
                     }
                 });
 
                 dialogBuilder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        optimizeResult.optimizeWithRestaurant(false);
                     }
                 });
 

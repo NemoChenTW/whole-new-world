@@ -17,6 +17,9 @@ public class TripData {
     private ArrayList<FuzzySearchResult> fuzzySearchResults;
     private ArrayList<Integer> fuzzySearchResultTravelTimes;
 
+    //
+    private ArrayList<Integer> fuzzySearchResultArrivalTimes;
+
     private boolean isWaypointsNeedUpdate = false;
 
     private ArrayList<PublicItinerary> myDriveItineraries;
@@ -34,7 +37,7 @@ public class TripData {
     }
 
     public boolean isAvailableForPlan() {
-        return (startPoint != null &&endPoint != null);
+        return (startPoint != null && endPoint != null);
     }
 
     public boolean hasWaypoints() {
@@ -69,6 +72,23 @@ public class TripData {
         return latLngs.toArray(new LatLng[0]);
     }
 
+    //
+    public int getStayTime(){
+        return wayPoints.get(0).getStaytimeToSeconds();
+    }
+
+    public ArrayList<Integer> getWaypointsOpeningTime(){
+        ArrayList<Integer> openingTime = new ArrayList<>();
+        wayPoints.forEach(locationPoint -> openingTime.add(locationPoint.getOpeningToSeconds()));
+        return openingTime;
+    }
+
+    public ArrayList<Integer> getWaypointsClosedTime(){
+        ArrayList<Integer> closedTime = new ArrayList<>();
+        wayPoints.forEach(locationPoint -> closedTime.add(locationPoint.getClosedToSeconds()));
+        return closedTime;
+    }
+
     public void setEndPoint(LatLng endPoint) {
         this.endPoint = endPoint;
     }
@@ -100,6 +120,16 @@ public class TripData {
     public void setFuzzySearchResultTravelTimes(ArrayList<Integer> fuzzySearchResultTravelTimes) {
         this.fuzzySearchResultTravelTimes = fuzzySearchResultTravelTimes;
     }
+
+    //
+    public ArrayList<Integer> getFuzzySearchResultArrivalTimes(){
+        return fuzzySearchResultArrivalTimes;
+    }
+
+    public void setFuzzySearchResultArrivalTimes(ArrayList<Integer> fuzzySearchResultTravelTimes){
+        this.fuzzySearchResultArrivalTimes = fuzzySearchResultArrivalTimes;
+    }
+
 
     public boolean isWaypointsNeedUpdate() {
         return isWaypointsNeedUpdate && ((myDriveItineraries != null && !myDriveItineraries.isEmpty()) || (fuzzySearchResults != null && !fuzzySearchResults.isEmpty()));

@@ -8,6 +8,7 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.api.model.Place;
 import com.taipei.ttbootcamp.BuildConfig;
 import com.taipei.ttbootcamp.Entities.GoogleGeocode;
 import com.taipei.ttbootcamp.PoiGenerator.POIGenerator;
@@ -17,6 +18,7 @@ import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IGoogleApiService;
 import com.taipei.ttbootcamp.interfaces.IInteractionDialog;
 import com.taipei.ttbootcamp.interfaces.IMapElementDisplay;
+import com.taipei.ttbootcamp.interfaces.IOptimizeResultCallBack;
 import com.taipei.ttbootcamp.interfaces.IOptimizeResultListener;
 import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
 import com.taipei.ttbootcamp.interfaces.IPlanResultListener;
@@ -40,9 +42,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
-public class TripController implements IPOISearchResult, IPlanResultListener,
-                                        IMapElementDisplay.IPositionUpdateListener,
-                                        IPublicItinerarySearchResultCallack, IOptimizeResultListener {
+public class TripController implements IPOISearchResult, IPlanResultListener, IMapElementDisplay.IPositionUpdateListener,
+                                    IPublicItinerarySearchResultCallack, IOptimizeResultListener, IOptimizeResultCallBack {
+
     static private final String TAG = "TripController";
 
     private RoutingApi mRoutingApi;
@@ -54,7 +56,12 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
     private ITripOptimizer mTripOptimizer;
     private IInteractionDialog mInteractionDialog;
 
+<<<<<<< Updated upstream
     public TripController(RoutingApi routingApi, SearchApi searchApi, IGoogleApiService googleApiService, PlacesClient googlePlaceClient, IMapElementDisplay mapElementDisplay, ITripOptimizer tripOptimizer, IInteractionDialog interactionDialog) {
+=======
+
+    public TripController(RoutingApi routingApi, SearchApi searchApi, IGoogleApiService googleApiService, PlacesClient googlePlaceClient, IMapElementDisplay mapElementDisplay, ITripOptimizer tripOptimizer) {
+>>>>>>> Stashed changes
         mRoutingApi = routingApi;
         mSearchApi = searchApi;
         mGoogleApiService = googleApiService;
@@ -80,15 +87,28 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
             LocationPoint lastWayPoint = tripData.getWayPoints().get(tripData.getWayPoints().size() - 1);
             tripData.setEndPoint(new LatLng(lastWayPoint.getPosition().toLocation()));
         }
-
+        //tripData.setEndPoint(new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation()));
+        // TODO Add updateWaypointFromMyDirveResults
+        LocationPoint lastWayPoint = tripData.getWayPoints().get(tripData.getWayPoints().size() - 1);
+        tripData.setEndPoint(new LatLng(lastWayPoint.getPosition().toLocation()));
+        /* From search
+        tripData.setEndPoint(new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation()));
+        tripData.updateWaypointFromSearchResults();
+        */
         updatePOIDetails(tripData);
         mRoutePlanner.planRoute(tripData, true);
     }
 
     private void updatePOIDetails(TripData tripData) {
+
+        final int[] index = {0};
+
         for (LocationPoint point : tripData.getWayPoints()) {
             Log.d(TAG, "Point= " + point.getName());
         }
+
+        ArrayList<LocationPoint> finalWayPoints = tripData.getWayPoints();
+
         Observable.fromIterable(tripData.getWayPoints())
                 .concatMap(wayPoint -> mGoogleApiService.getGeocode(wayPoint.getName(), BuildConfig.ApiKey))
                 .subscribeOn(Schedulers.io())
@@ -101,6 +121,13 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
                                                     return null;
                                                 }
                                             }))
+                        .onErrorReturnItem(new FetchPlaceResponse() {
+                            @NonNull
+                            @Override
+                            public Place getPlace() {
+                                return null;
+                            }
+                        }))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new DisposableObserver<FetchPlaceResponse>() {
@@ -113,6 +140,16 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
                         } else {
                             Log.d(TAG, "Empty place");
                         }
+
+                        int openingTime = place.getOpeningHours().getPeriods().get(index[0]).getOpen().getTime().getHours() * 3600 +
+                                place.getOpeningHours().getPeriods().get(index[0]).getOpen().getTime().getMinutes() * 60;
+                        int closedTime = place.getOpeningHours().getPeriods().get(index[0]).getClose().getTime().getHours() * 3600 +
+                                place.getOpeningHours().getPeriods().get(index[0]).getOpen().getTime().getMinutes() * 60;
+
+                        finalWayPoints.get(index[0]).setOpeningHours(openingTime, closedTime);
+
+                        index[0]++;
+
                     }
 
                     @Override
@@ -126,6 +163,16 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
                     }
                 });
     }
+
+                        tripData.removeWaypoints();
+
+                        for(LocationPoint wayPoint : finalWayPoints){
+                            tripData.addWaypoints(wayPoint);
+                        }
+                    }
+                });
+    }
+
     private Observable<FetchPlaceResponse> getPlaceResponseObservable(final PlacesClient placesClient, final GoogleGeocode googleGeocode) {
         if (googleGeocode.getResults().isEmpty()) {
             return Observable.error(new RuntimeException("Empty googleGeocode"));
@@ -160,13 +207,77 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
         onPOISearchResult(tripData);
     }
 
+    //
+    private boolean isEatingTime(int arrivalTime){
+        int secondOfHour = 3600;
+        if(arrivalTime >= 11 * secondOfHour && arrivalTime <= 13 * secondOfHour){
+            return true;
+        }
+    //        if(arrivalTime >= 18 * secondOfHour && arrivalTime <= 20 * secondOfHour){
+    //            return true;
+    //        }
+        return false;
+    }
+
+    private boolean isOpeningHour(int arrivalTime, int openingTime, int closedTime){
+        if(arrivalTime >= openingTime && arrivalTime <= closedTime){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean setOptimizedResult(boolean isAdd){
+        return isAdd;
+    }
+
     @Override
     public void onRoutePlanComplete(RouteResponse routeResult, TripData tripData, boolean needOptimize) {
-        Log.e(TAG, "onRoutePlanComplete: " + needOptimize);
-        //needOptimize = false;
+
+    //        needOptimize = false;
+
         if (needOptimize) {
-            tripData.setFuzzySearchResultTravelTimes(prepareOptimizeData(routeResult, tripData.getFuzzySearchResults()));
-            mTripOptimizer.optimizeTrip(tripData);
+
+            int stayTime = tripData.getStayTime();
+            ArrayList<Integer> fuzzySearchResultTravelTimes = prepareOptimizeData(routeResult, tripData.getFuzzySearchResults(), stayTime);
+            ArrayList<Integer> fuzzySearchResultArrivalTimes = new ArrayList<Integer>();
+
+            tripData.setFuzzySearchResultTravelTimes(fuzzySearchResultTravelTimes);
+
+            int second = 0;
+            int minute = 0;
+            int hour = 9;
+            int currentTime = second + minute * 60 + hour * 3600;
+
+            for(int i = 0; i < fuzzySearchResultTravelTimes.size(); i++){
+                currentTime += fuzzySearchResultTravelTimes.get(i);
+                fuzzySearchResultArrivalTimes.add(currentTime);
+            }
+
+            tripData.setFuzzySearchResultArrivalTimes(fuzzySearchResultArrivalTimes);
+
+            Log.d(TAG, "searchResultArrivalTimes: " + tripData.getFuzzySearchResultArrivalTimes());
+
+
+            ArrayList<Integer> openingTime = tripData.getWaypointsOpeningTime();
+            ArrayList<Integer> closedTime = tripData.getWaypointsClosedTime();
+
+            int restaurantIdx = -1;
+
+            for(int i = 0; i < fuzzySearchResultArrivalTimes.size(); i++){
+                int arrivalTime = fuzzySearchResultArrivalTimes.get(i);
+                if(isEatingTime(arrivalTime)){
+                    restaurantIdx = i;
+
+                }
+//                if(isOpeningHour(arrivalTime, openingTime.get(i), closedTime.get(i))){
+//                }
+            }
+
+            if(restaurantIdx != -1){
+                interactionDialog.setResultDialog(tripData, true);
+            }
+
         } else {
             if (mMapElementDisplay != null) {
                 // Remove the markers which set by press
@@ -176,7 +287,13 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
         }
     }
 
-    private ArrayList<Integer> prepareOptimizeData(RouteResponse routeResult, ArrayList<FuzzySearchResult> originalSearchResult) {
+    void optimizeWithRestaurant(boolean isOptimize) {
+        if (isOptimize){
+            mTripOptimizer.optimizeTrip(tripData, restaurantIdx);
+        }
+    }
+
+    private ArrayList<Integer> prepareOptimizeData(RouteResponse routeResult, ArrayList<FuzzySearchResult> originalSearchResult, int stayTime) {
         ArrayList<Integer> fuzzySearchResultTravelTimes = new ArrayList<Integer>();
 
         for (FullRoute route: routeResult.getRoutes())
@@ -188,16 +305,21 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
                         instruction.getInstructionType().equals("LOCATION_ARRIVAL"))
                 {
                     fuzzySearchResultTravelTimes.add(instruction.getTravelTimeInSeconds() - lastTravelTime);
+                    //
                     Log.d(TAG, "Found waypoint or arrival! Time: " + instruction.getTravelTimeInSeconds()
-                                            + " interval: " + (instruction.getTravelTimeInSeconds() - lastTravelTime));
-                    fuzzySearchResultTravelTimes.add(instruction.getTravelTimeInSeconds() - lastTravelTime);
-                    lastTravelTime = instruction.getTravelTimeInSeconds();
+                            + " interval: " + (instruction.getTravelTimeInSeconds() - lastTravelTime));
+                    // remove this for only adding travel time once
+    //                    fuzzySearchResultTravelTimes.add(instruction.getTravelTimeInSeconds() - lastTravelTime);
+                    lastTravelTime = instruction.getTravelTimeInSeconds() + stayTime;
                 }
             }
         }
+
         Log.d(TAG, "fuzzySearchResultTravelTimes= " + fuzzySearchResultTravelTimes);
+
         return fuzzySearchResultTravelTimes;
     }
+
 
     @Override
     public void onPositionUpdate(TripData tripData) {
