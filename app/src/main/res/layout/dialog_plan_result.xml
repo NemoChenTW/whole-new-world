@@ -17,6 +17,7 @@
             android:textSize="18sp"
             android:textStyle="bold|italic"
             android:gravity="center_vertical"
+            android:textColor="#FFFFFF"
             android:text=""/>
 
     </RelativeLayout>

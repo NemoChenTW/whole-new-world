@@ -19,6 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@id/marker"
+        android:textColor="#FFFFFF"
         android:textSize="14sp"/>
 
     <TextView
@@ -26,7 +27,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tv_arrival_time"
-        android:background="#fafafa"
+        android:background="@android:color/transparent"
+        android:textColor="#FFFFFF"
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:maxLines="1"

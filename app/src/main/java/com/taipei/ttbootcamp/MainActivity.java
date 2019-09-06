@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -374,10 +376,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         dialogAddSubPrivateTopicRecyclerViewAdapter.setOnItemClickListener((View v, int position) -> {
 
         });
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
         AlertDialog mAlertDialog = builder.create();
         mAlertDialog.show();
         mAlertDialog.getWindow().setContentView(view);
+        mAlertDialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
+//        mAlertDialog.getWindow().getDecorView().setBackgroundResource(android.R.color.transparent);
+        mAlertDialog.getWindow().setDimAmount(0.0f);
         // hard coded temporarily, 0: skip, 1: add, -1: remove
         byte skipAddRemove = 1;
 
@@ -388,7 +393,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
     void showAddOrRemoveDialog(boolean isAdding) {
         String message = isAdding ? getString(R.string.add_lunch_restaurant) : getString(R.string.remove_poi);
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this, R.style.AlertDialogCustom);
         dialogBuilder.setTitle("Title");
         dialogBuilder.setMessage(message);
 
@@ -407,6 +412,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         });
 
         AlertDialog dialog = dialogBuilder.create();
+        Window dialogWindow = dialog.getWindow();
+        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+        dialogWindow.setBackgroundDrawableResource(R.drawable.bg_dialog_pop);
+        dialogWindow.setDimAmount(0.0f);
         dialog.show();
     }
     // end of TODO
