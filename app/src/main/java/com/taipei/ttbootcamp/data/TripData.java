@@ -127,7 +127,7 @@ public class TripData {
     }
 
     public void setFuzzySearchResultArrivalTimes(ArrayList<Integer> fuzzySearchResultTravelTimes){
-        this.fuzzySearchResultArrivalTimes = fuzzySearchResultArrivalTimes;
+        this.fuzzySearchResultArrivalTimes = fuzzySearchResultTravelTimes;
     }
 
 

@@ -100,6 +100,16 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
     private BootcampBroadcastReceiver mBootcampBroadcastReceiver = new BootcampBroadcastReceiver();
 
+    private IOptimizeResultCallBack optimizeResult = new IOptimizeResultCallBack() {
+        @Override
+        public void optimizeWithRestaurant(TripData tripData, boolean isOptimize, int restaurantIdx) {
+            if(isOptimize){
+                Log.d(TAG, "Optimize Trip: " + restaurantIdx);
+                mTripOptimizer.optimizeTrip(tripData, restaurantIdx);
+            }
+        }
+    };
+
     TripData mTripData;
 
     @Override
@@ -434,13 +444,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
     public class InteractionDialog implements IInteractionDialog {
         Context mContext;
-
-        IOptimizeResultCallBack optimizeResult = new IOptimizeResultCallBack() {
-            @Override
-            public void optimizeWithRestaurant(TripData tripData, boolean isOptimize, int restaurantIdx) {
-
-            }
-        };
 
         @Override
         public void initialDialog(Context context) {

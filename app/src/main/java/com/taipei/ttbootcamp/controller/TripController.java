@@ -136,12 +136,12 @@ public class TripController implements IPOISearchResult, IPlanResultListener, IM
                             Log.d(TAG, "Empty place");
                         }
 
-                        int openingTime = place.getOpeningHours().getPeriods().get(index[0]).getOpen().getTime().getHours() * 3600 +
-                                place.getOpeningHours().getPeriods().get(index[0]).getOpen().getTime().getMinutes() * 60;
-                        int closedTime = place.getOpeningHours().getPeriods().get(index[0]).getClose().getTime().getHours() * 3600 +
-                                place.getOpeningHours().getPeriods().get(index[0]).getOpen().getTime().getMinutes() * 60;
+//                        int openingTime = place.getOpeningHours().getPeriods().get(index[0]).getOpen().getTime().getHours() * 3600 +
+//                                place.getOpeningHours().getPeriods().get(index[0]).getOpen().getTime().getMinutes() * 60;
+//                        int closedTime = place.getOpeningHours().getPeriods().get(index[0]).getClose().getTime().getHours() * 3600 +
+//                                place.getOpeningHours().getPeriods().get(index[0]).getOpen().getTime().getMinutes() * 60;
 
-                        finalWayPoints.get(index[0]).setOpeningHours(openingTime, closedTime);
+//                        finalWayPoints.get(index[0]).setOpeningHours(openingTime, closedTime);
 
                         index[0]++;
 
@@ -155,10 +155,10 @@ public class TripController implements IPOISearchResult, IPlanResultListener, IM
                     @Override
                     public void onComplete() {
                         Log.d(TAG, "onComplete");
-                        tripData.removeWaypoints();
-                        for (LocationPoint wayPoint : finalWayPoints) {
-                            tripData.addWaypoints(wayPoint);
-                        }
+//                        tripData.removeWaypoints();
+//                        for (LocationPoint wayPoint : finalWayPoints) {
+//                            tripData.addWaypoints(wayPoint);
+//                        }
                     }
                 });
     }
@@ -202,6 +202,7 @@ public class TripController implements IPOISearchResult, IPlanResultListener, IM
     private boolean isEatingTime(int arrivalTime){
         int secondOfHour = 3600;
         if(arrivalTime >= 11 * secondOfHour && arrivalTime <= 13 * secondOfHour){
+            Log.d(TAG, "Eating Time!");
             return true;
         }
     //        if(arrivalTime >= 18 * secondOfHour && arrivalTime <= 20 * secondOfHour){
@@ -220,12 +221,6 @@ public class TripController implements IPOISearchResult, IPlanResultListener, IM
     @Override
     public void onRoutePlanComplete(RouteResponse routeResult, TripData tripData, boolean needOptimize) {
 
-        if (mMapElementDisplay != null) {
-            // Remove the markers which set by press
-            mMapElementDisplay.removeMarkers();
-            mMapElementDisplay.displayRoutes(routeResult.getRoutes(), tripData);
-        }
-
         int stayTime = tripData.getStayTime();
         ArrayList<Integer> fuzzySearchResultTravelTimes = prepareOptimizeData(routeResult, tripData.getFuzzySearchResults(), stayTime);
         ArrayList<Integer> fuzzySearchResultArrivalTimes = new ArrayList<Integer>();
@@ -241,6 +236,7 @@ public class TripController implements IPOISearchResult, IPlanResultListener, IM
 
         for(int i = 0; i < fuzzySearchResultTravelTimes.size(); i++){
             currentTime += fuzzySearchResultTravelTimes.get(i);
+            Log.d(TAG, "CurrentTime: " + currentTime);
             fuzzySearchResultArrivalTimes.add(currentTime);
         }
 
@@ -252,23 +248,30 @@ public class TripController implements IPOISearchResult, IPlanResultListener, IM
         ArrayList<Integer> closedTime = tripData.getWaypointsClosedTime();
 
         for(int i = 0; i < fuzzySearchResultArrivalTimes.size(); i++){
-            int arrivalTime = fuzzySearchResultArrivalTimes.get(i);
-            if(isEatingTime(arrivalTime)){
+            if(isEatingTime(fuzzySearchResultArrivalTimes.get(i))){
                 restaurantIdx = i;
                 needOptimize = true;
+                break;
 
             }
-            else{
-                needOptimize = false;
-            }
         }
+
+        if (mMapElementDisplay != null) {
+            // Remove the markers which set by press
+            mMapElementDisplay.removeMarkers();
+            mMapElementDisplay.displayRoutes(routeResult.getRoutes(), tripData);
+        }
+
+        Log.d(TAG, "Optimized: " + needOptimize);
 
         mInteractionDialog.setResultDialog(tripData, needOptimize, restaurantIdx);
 
     }
 
+    @Override
     public void optimizeWithRestaurant(TripData tripData, boolean isOptimize, int restaurantIdx) {
         if (isOptimize){
+            Log.d(TAG, "Optimize Trip: " + restaurantIdx);
             mTripOptimizer.optimizeTrip(tripData, restaurantIdx);
         }
     }
@@ -284,13 +287,13 @@ public class TripController implements IPOISearchResult, IPlanResultListener, IM
                 if (instruction.getInstructionType().equals("LOCATION_WAYPOINT") ||
                         instruction.getInstructionType().equals("LOCATION_ARRIVAL"))
                 {
-                    fuzzySearchResultTravelTimes.add(instruction.getTravelTimeInSeconds() - lastTravelTime);
+                    fuzzySearchResultTravelTimes.add(instruction.getTravelTimeInSeconds() + stayTime - lastTravelTime);
                     //
                     Log.d(TAG, "Found waypoint or arrival! Time: " + instruction.getTravelTimeInSeconds()
                             + " interval: " + (instruction.getTravelTimeInSeconds() - lastTravelTime));
                     // remove this for only adding travel time once
     //                    fuzzySearchResultTravelTimes.add(instruction.getTravelTimeInSeconds() - lastTravelTime);
-                    lastTravelTime = instruction.getTravelTimeInSeconds() + stayTime;
+                    lastTravelTime = instruction.getTravelTimeInSeconds();
                 }
             }
         }

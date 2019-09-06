@@ -43,7 +43,7 @@ public class TripOptimizer implements ITripOptimizer {
     }
 
     public void optimizeTrip(TripData tripData, int index) {
-        optimizeWithPetrolStation(tripData);
+//        optimizeWithPetrolStation(tripData);
         optimizeWithRestaurants(tripData, index);
     }
 
@@ -53,6 +53,8 @@ public class TripOptimizer implements ITripOptimizer {
         //Log.d(TAG, "targetLocation= " + targetLocation.getId());
 
         LatLng targetSearchCenter = tripData.getWayPoints().get(index).getPosition();
+
+        Log.d(TAG, "Optimized Point: " + targetSearchCenter);
 
         mSearchApi.search(new FuzzySearchQueryBuilder("restaurant")
                 .withPreciseness(new LatLngAcc(targetSearchCenter, 100000))
@@ -69,6 +71,7 @@ public class TripOptimizer implements ITripOptimizer {
                 .subscribe(new DisposableSingleObserver<RouteResponse>() {
                     @Override
                     public void onSuccess(RouteResponse routeResult) {
+                        Log.d(TAG, "Complete optimize Trip!");
                         submitOptimizeResult(tripData);
                     }
 
