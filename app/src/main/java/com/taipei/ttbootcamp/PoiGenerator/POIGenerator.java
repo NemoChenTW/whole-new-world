@@ -8,6 +8,7 @@ import com.taipei.ttbootcamp.MyDriveAPI.PublicItinerary;
 import com.taipei.ttbootcamp.data.LocationPoint;
 import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IPOISearchResult;
+import com.taipei.ttbootcamp.interfaces.IPublicItinerarySearchResultCallack;
 import com.tomtom.online.sdk.common.location.LatLng;
 import com.tomtom.online.sdk.common.location.LatLngAcc;
 import com.tomtom.online.sdk.search.SearchApi;
@@ -15,6 +16,7 @@ import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchQueryBuilder;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResponse;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -88,7 +90,7 @@ public class POIGenerator {
                 });
     }
 
-    public static void queryWithMyDriveAPI(LatLng aLatLng, String aTagName, int aMaxResult, TripData tripData, IPOISearchResult searchResultCallback) {
+    public static void queryWithMyDriveAPI(LatLng aLatLng, String aTagName, int aMaxResult, TripData tripData, IPublicItinerarySearchResultCallack searchResultCallback) {
         MyDriveHelper.getPublicItinerariesQuery(aLatLng, aTagName, aMaxResult).enqueue(new Callback<List<PublicItinerary>>() {
             @Override
             public void onResponse(Call<List<PublicItinerary>> call, Response<List<PublicItinerary>> response) {
@@ -101,34 +103,8 @@ public class POIGenerator {
                         Log.e(TAG, "Cannot convert MyDrive Itinerary.");
                         return;
                     }
-
-                    tripData.removeWaypoints();
-                    tripData.setTripTitle(itinerary.getName());
-
-                    Log.e("MyDrive", "Itinerary ID: " + itinerary.getId() + ", Name: " + itinerary.getName());
-                    int i = 0;
-                    for (PublicItinerary.SegmentsBean segment : itinerary.getSegments()) {
-                        Log.e("MyDrive", "Segment Size: " + itinerary.getSegments().size());
-                        for (PublicItinerary.SegmentsBean.WaypointsBean waypoint : segment.getWaypoints()) {
-                            Log.e("MyDrive", "waypoint Size: " + segment.getWaypoints().size());
-
-                            //if (waypoint.getLocationInfo().getPoiName() != null
-                            //        && !waypoint.getLocationInfo().getPoiName().isEmpty()) {
-                            //    Log.e("MyDrive", "Add POI Name: " + waypoint.getLocationInfo().getPoiName());
-                            if (waypoint.getLocationInfo() != null && waypoint.getLocationInfo().getPoint() != null) {
-                                if (waypoint.getLocationInfo().getPoiName() != null && !waypoint.getLocationInfo().getPoiName().isEmpty()) {
-                                    Log.e("MyDrive", "Add WP: " + i + " Name: " + waypoint.getLocationInfo().getPoiName());
-                                    ++i;
-                                    tripData.addWaypoints(new LocationPoint(
-                                            new LatLng(waypoint.getLocationInfo().getPoint().get(0)
-                                                    , waypoint.getLocationInfo().getPoint().get(1))
-                                                , waypoint.getLocationInfo().getPoiName()));
-                                }
-                            }
-                            //}
-                        }
-                    }
-                    searchResultCallback.onPOISearchResult(tripData);
+                    tripData.setMyDriveItineraries(new ArrayList<PublicItinerary>(publicItineraries));
+                    searchResultCallback.onPublicItinerarySearchResult(tripData);
                 }
                 else {
                     Log.e("MyDrive", "Empty public Itinerary.");
