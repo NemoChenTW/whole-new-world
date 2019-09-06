@@ -16,7 +16,11 @@ public class TripData {
 
     private boolean isWaypointsNeedUpdate = false;
 
-    public TripData() {}
+    private String tripTitle;
+
+    public TripData() {
+        tripTitle = "";
+    }
 
     public TripData(final LatLng startPoint) {
         this.startPoint = startPoint;
@@ -99,5 +103,13 @@ public class TripData {
         wayPoints.clear();
         this.fuzzySearchResults.forEach(result -> wayPoints.add(new LocationPoint(result.getPosition(), result.getPoi().getName())));
         wayPoints.remove(wayPoints.size() - 1);
+    }
+
+    public String getTripTitle() {
+        return tripTitle;
+    }
+
+    public void setTripTitle(String tripTitle) {
+        this.tripTitle = tripTitle;
     }
 }
