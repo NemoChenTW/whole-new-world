@@ -250,19 +250,24 @@ public class TripController implements IPOISearchResult, IPlanResultListener, IM
         for(int i = 0; i < fuzzySearchResultArrivalTimes.size(); i++){
             if(isEatingTime(fuzzySearchResultArrivalTimes.get(i))){
                 restaurantIdx = i;
-                needOptimize = true;
                 break;
-
             }
         }
+
+        if(restaurantIdx == -1){
+            needOptimize = false;
+        }
+        else{
+            needOptimize = true;
+        }
+
+        Log.d(TAG, "Optimized: " + needOptimize);
 
         if (mMapElementDisplay != null) {
             // Remove the markers which set by press
             mMapElementDisplay.removeMarkers();
             mMapElementDisplay.displayRoutes(routeResult.getRoutes(), tripData);
         }
-
-        Log.d(TAG, "Optimized: " + needOptimize);
 
         mInteractionDialog.setResultDialog(tripData, needOptimize, restaurantIdx);
 
