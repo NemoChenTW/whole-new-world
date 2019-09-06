@@ -415,6 +415,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     // TODO: move to interface
     void setResultDialog() {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_plan_result, null);
+        ((TextView)view.findViewById(R.id.tv_title)).setText(tripData.getTripTitle());
         RecyclerView recyclerView = view.findViewById(R.id.rc_dialog);
         ResultAdapter dialogAddSubPrivateTopicRecyclerViewAdapter = new ResultAdapter(tripData);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
