@@ -1,6 +1,7 @@
 package com.taipei.ttbootcamp;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,6 +16,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.PopupWindow;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -48,6 +51,7 @@ import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResponse;
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -181,18 +185,50 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
             ((Button)view.findViewById(R.id.feeling_button_2)).setText("Coffee");
             ((Button)view.findViewById(R.id.feeling_button_3)).setText("Drinks");
             ((Button)view.findViewById(R.id.feeling_button_4)).setText("Don't want to go home");
+            ((Button)view.findViewById(R.id.feeling_button_5)).setText("Get from My Drive");
 
             ArrayList<Button> buttonList = new ArrayList<>();
             buttonList.add(view.findViewById(R.id.feeling_button_1));
             buttonList.add(view.findViewById(R.id.feeling_button_2));
             buttonList.add(view.findViewById(R.id.feeling_button_3));
             buttonList.add(view.findViewById(R.id.feeling_button_4));
+            buttonList.add(view.findViewById(R.id.feeling_button_5));
 
-            for (Button button : buttonList) {
-                button.setOnClickListener(view1 -> mPopupWindow.dismiss());
-            }
+            buttonList.get(4).setOnClickListener((View v) -> {
+                mPopupWindow.dismiss();
+                setMyDriveSelectionDialog();
+            });
+
+//            for (Button button : buttonList) {
+//                button.setOnClickListener(view1 -> mPopupWindow.dismiss());
+//            }
         }
         mPopupWindow.showAtLocation(mRootView, Gravity.CENTER_VERTICAL | Gravity.LEFT,0, 40);
+    }
+
+    void setMyDriveSelectionDialog() {
+        final Dialog dialog = new Dialog(this, R.style.AlertDialogCustom);
+        dialog.setContentView(R.layout.dialog_my_drive);
+        List<String> stringList = new ArrayList<>();  // here is list
+        for (int i = 0; i < 5; i++) {
+            stringList.add(tripData.getMyDriveItineraries().get(i).getName());
+        }
+        RadioGroup rg = dialog.findViewById(R.id.radio_group);
+
+        for (int i = 0; i < stringList.size(); i++){
+            RadioButton rb = new RadioButton(this); // dynamically creating RadioButton and adding to RadioGroup.
+            rb.setText(stringList.get(i));
+            rg.addView(rb);
+        }
+        dialog.show();
+
+        rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                mTripController.SelectMyDriveItineraryWithIndex(tripData, (checkedId - 1) % 5);
+                dialog.dismiss();
+            }
+        });
     }
 
     private View.OnClickListener getSearchButtonListener() {

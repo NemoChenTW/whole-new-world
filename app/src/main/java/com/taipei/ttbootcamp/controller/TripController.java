@@ -73,6 +73,7 @@ public class TripController implements IPOISearchResult, IPlanResultListener,
         }
         else {
             // From MyDrive
+            if (tripData.getWayPoints().isEmpty()) return;
             LocationPoint lastWayPoint = tripData.getWayPoints().get(tripData.getWayPoints().size() - 1);
             tripData.setEndPoint(new LatLng(lastWayPoint.getPosition().toLocation()));
         }
