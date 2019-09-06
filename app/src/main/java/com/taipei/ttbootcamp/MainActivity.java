@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.taipei.ttbootcamp.MyDriveAPI.MyDriveHelper;
+import com.taipei.ttbootcamp.PoiGenerator.POIGenerator;
 import com.taipei.ttbootcamp.Presenter.MainActivityPresenter;
 import com.taipei.ttbootcamp.controller.TripController;
 import com.taipei.ttbootcamp.data.TripData;
@@ -194,6 +195,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
             buttonList.add(view.findViewById(R.id.feeling_button_4));
             buttonList.add(view.findViewById(R.id.feeling_button_5));
 
+            buttonList.get(0).setOnClickListener((View v) -> {
+                mTripController.PlanTrip(tripData, POIGenerator.POITYPE.MUSEUM, 100000);
+            });
+
             buttonList.get(4).setOnClickListener((View v) -> {
                 mPopupWindow.dismiss();
                 setMyDriveSelectionDialog();
@@ -296,7 +301,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
                     //TripData tripData = new TripData(new LatLng(25.046570, 121.515313));
                     tripData = new TripData(new LatLng(49.44239, 1.09846));
-                    //mTripController.PlanTrip(tripData, POIGenerator.POITYPE.MUSEUM, 100000);
                     mTripController.PlanTripFromMyDrive(tripData, new LatLng(49.44239, 1.09846), "tomtomroadtrips,historical");
                 }
             };
