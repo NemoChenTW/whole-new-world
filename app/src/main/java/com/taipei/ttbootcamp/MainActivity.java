@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     private IOptimizeResultCallBack optimizeResult = new IOptimizeResultCallBack() {
         @Override
         public void optimizeWithRestaurant(TripData tripData, boolean isOptimize, int restaurantIdx) {
-            if(isOptimize){
+            if(isOptimize && restaurantIdx != -1){
                 Log.d(TAG, "Optimize Trip: " + restaurantIdx);
                 mTripOptimizer.optimizeTrip(tripData, restaurantIdx);
             }
