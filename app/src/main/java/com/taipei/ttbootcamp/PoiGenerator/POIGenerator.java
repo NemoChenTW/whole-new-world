@@ -101,33 +101,7 @@ public class POIGenerator {
                         Log.e(TAG, "Cannot convert MyDrive Itinerary.");
                         return;
                     }
-
-                    tripData.removeWaypoints();
-                    tripData.setTripTitle(itinerary.getName());
-
-                    Log.e("MyDrive", "Itinerary ID: " + itinerary.getId() + ", Name: " + itinerary.getName());
-                    int i = 0;
-                    for (PublicItinerary.SegmentsBean segment : itinerary.getSegments()) {
-                        Log.e("MyDrive", "Segment Size: " + itinerary.getSegments().size());
-                        for (PublicItinerary.SegmentsBean.WaypointsBean waypoint : segment.getWaypoints()) {
-                            Log.e("MyDrive", "waypoint Size: " + segment.getWaypoints().size());
-
-                            //if (waypoint.getLocationInfo().getPoiName() != null
-                            //        && !waypoint.getLocationInfo().getPoiName().isEmpty()) {
-                            //    Log.e("MyDrive", "Add POI Name: " + waypoint.getLocationInfo().getPoiName());
-                            if (waypoint.getLocationInfo() != null && waypoint.getLocationInfo().getPoint() != null) {
-                                if (waypoint.getLocationInfo().getPoiName() != null && !waypoint.getLocationInfo().getPoiName().isEmpty()) {
-                                    Log.e("MyDrive", "Add WP: " + i + " Name: " + waypoint.getLocationInfo().getPoiName());
-                                    ++i;
-                                    tripData.addWaypoints(new LocationPoint(
-                                            new LatLng(waypoint.getLocationInfo().getPoint().get(0)
-                                                    , waypoint.getLocationInfo().getPoint().get(1))
-                                                , waypoint.getLocationInfo().getPoiName()));
-                                }
-                            }
-                            //}
-                        }
-                    }
+                    tripData.setMyDriveItinerary(itinerary);
                     searchResultCallback.onPOISearchResult(tripData);
                 }
                 else {
