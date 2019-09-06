@@ -11,8 +11,6 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -412,10 +410,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         });
 
         AlertDialog dialog = dialogBuilder.create();
-        Window dialogWindow = dialog.getWindow();
-        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
-        dialogWindow.setBackgroundDrawableResource(R.drawable.bg_dialog_pop);
-        dialogWindow.setDimAmount(0.0f);
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_pop);
+        dialog.getWindow().setDimAmount(0.0f);
         dialog.show();
     }
     // end of TODO
