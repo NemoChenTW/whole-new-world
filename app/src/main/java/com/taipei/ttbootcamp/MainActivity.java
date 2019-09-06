@@ -203,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
             buttonList.add(view.findViewById(R.id.feeling_button_5));
 
             buttonList.get(0).setOnClickListener((View v) -> {
+                mPopupWindow.dismiss();
                 mTripController.PlanTrip(mTripData, POIGenerator.POITYPE.MUSEUM, 100000);
             });
 
@@ -443,6 +444,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
         void showAddOrRemoveDialog(boolean isAdding) {
 
             if (isAdding) {
+                if (mTTSEngine != null) {
+                    mTTSEngine.speak("Do you want to add a restaurant during lunch time?", Locale.ENGLISH);
+                }
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mContext, R.style.AlertDialogCustom);
                 String message = getString(R.string.add_lunch_restaurant);
                 dialogBuilder.setTitle("Title");
