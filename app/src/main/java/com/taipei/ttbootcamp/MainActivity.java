@@ -174,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
             @Override
             public void onClick(View v) {
                 showPopup();
+                mMainActivityPresenter.hideMarkerFeatureMenu();
             }
         });
     }
