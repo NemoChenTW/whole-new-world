@@ -44,7 +44,7 @@ public class TripOptimizer implements ITripOptimizer {
     }
 
     public void optimizeTrip(TripData tripData, int index) {
-//        optimizeWithPetrolStation(tripData);
+//        optimizeWithPetrolStation(tripData, index);
         optimizeWithRestaurants(tripData, index);
     }
 
@@ -66,7 +66,7 @@ public class TripOptimizer implements ITripOptimizer {
                 .observeOn(AndroidSchedulers.mainThread())
                 // Plan route with search result
                 .flatMap(fuzzySearchResponse -> mRoutingApi.planRoute(
-                        createRouteQuery(tripData, fuzzySearchResponse)))
+                        createRouteQuery(tripData, fuzzySearchResponse, index)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new DisposableSingleObserver<RouteResponse>() {
@@ -85,7 +85,7 @@ public class TripOptimizer implements ITripOptimizer {
                 });
     }
 
-    private void optimizeWithPetrolStation(TripData tripData) {
+    private void optimizeWithPetrolStation(TripData tripData, int index) {
         //ArrayList<FuzzySearchResult> storedSearchResult = tripData.getFuzzySearchResults();
         //FuzzySearchResult targetLocation = storedSearchResult.get(storedSearchResult.size() / 2);
         //Log.d(TAG, "targetLocation= " + targetLocation.getId());
@@ -102,7 +102,7 @@ public class TripOptimizer implements ITripOptimizer {
                 .observeOn(AndroidSchedulers.mainThread())
                 // Plan route with search result
                 .flatMap(fuzzySearchResponse -> mRoutingApi.planRoute(
-                        createRouteQuery(tripData, fuzzySearchResponse)))
+                        createRouteQuery(tripData, fuzzySearchResponse, index)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new DisposableSingleObserver<RouteResponse>() {
@@ -129,7 +129,7 @@ public class TripOptimizer implements ITripOptimizer {
         return (tripData.hasWaypoints()) ? routeQueryBuilder.withWayPoints(tripData.getWaypointsLatLng()).build() : routeQueryBuilder.build();
     }
 
-    private RouteQuery createRouteQuery(@NotNull TripData tripData, @NotNull FuzzySearchResponse fuzzySearchResponse) {
+    private RouteQuery createRouteQuery(@NotNull TripData tripData, @NotNull FuzzySearchResponse fuzzySearchResponse, int targetIndex) {
         FuzzySearchResult newPosition = fuzzySearchResponse.getResults().get(0);
         Log.e(TAG, "create route query " + newPosition.getPoi().getName());
         // Update FuzzySearchResults with new search point
@@ -138,7 +138,7 @@ public class TripOptimizer implements ITripOptimizer {
         if (searchResults != null) {
             Log.e(TAG, "create route query searchResults: " + searchResults);
             Log.e(TAG, "create route query searchResults: " + searchResults.size());
-            final int targetIndex = searchResults.size() / 2;
+//            final int targetIndex = searchResults.size() / 2;
             searchResults.add(targetIndex + 1, newPosition);
 
             tripData.setFuzzySearchResults(searchResults);
@@ -153,7 +153,7 @@ public class TripOptimizer implements ITripOptimizer {
                 tripData.updateWaypointFromSearchResults();
             }
 
-            final int targetIndex = tripData.getWayPoints().size() / 2;
+//            final int targetIndex = tripData.getWayPoints().size() / 2;
             tripData.addWaypoints(targetIndex + 1, new LocationPoint(newPosition.getPosition(), newPosition.getPoi().getName()));
             //tripData.setEndPoint(new LatLng(tripData.getWayPoints().get(tripData.getWayPoints().size() - 1).getPosition()));
 
