@@ -75,10 +75,10 @@ public class TripController implements IPOISearchResult, IPlanResultListener, IM
         tripData.updateWaypointFromSearchResults();
         ArrayList<FuzzySearchResult> searchResult = tripData.getFuzzySearchResults();
 
-        if (searchResult != null && !searchResult.isEmpty()) {
+        if (!tripData.isUseMyDriveData() && searchResult != null && !searchResult.isEmpty()) {
             tripData.setEndPoint(new LatLng(searchResult.get(searchResult.size() - 1).getPosition().toLocation()));
         }
-        else {
+        else if (tripData.isUseMyDriveData()){
             // From MyDrive
             if (tripData.getWayPoints().isEmpty()) return;
             LocationPoint lastWayPoint = tripData.getWayPoints().get(tripData.getWayPoints().size() - 1);

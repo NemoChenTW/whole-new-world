@@ -26,10 +26,12 @@ public class TripData {
     private Integer selectedItineraryIndex;
 
     private String tripTitle;
+    private boolean useMyDriveData;
 
     public TripData() {
         tripTitle = "";
         selectedItineraryIndex = -1;
+        useMyDriveData = true;
     }
 
     public TripData(final LatLng startPoint) {
@@ -113,6 +115,9 @@ public class TripData {
         if (this.fuzzySearchResults != null && !this.fuzzySearchResults.isEmpty()) {
             this.fuzzySearchResults.clear();
         }
+
+        useMyDriveData = false;
+
         this.fuzzySearchResults = (ArrayList<FuzzySearchResult>) fuzzySearchResults.clone();
         isWaypointsNeedUpdate = true;
     }
@@ -143,11 +148,11 @@ public class TripData {
         isWaypointsNeedUpdate = false;
         wayPoints.clear();
 
-        if (this.fuzzySearchResults != null) {
+        if (!useMyDriveData && this.fuzzySearchResults != null) {
             this.fuzzySearchResults.forEach(result -> wayPoints.add(new LocationPoint(result.getPosition(), result.getPoi().getName())));
             wayPoints.remove(wayPoints.size() - 1);
         }
-        else if (this.myDriveItineraries != null && !this.myDriveItineraries.isEmpty() && selectedItineraryIndex >= 0 && selectedItineraryIndex < this.myDriveItineraries.size()) {
+        else if (useMyDriveData && this.myDriveItineraries != null && !this.myDriveItineraries.isEmpty() && selectedItineraryIndex >= 0 && selectedItineraryIndex < this.myDriveItineraries.size()) {
             PublicItinerary myDriveItinerary = myDriveItineraries.get(selectedItineraryIndex);
             setTripTitle(myDriveItinerary.getName());
 
@@ -197,6 +202,9 @@ public class TripData {
             this.myDriveItineraries.clear();
         }
         this.myDriveItineraries = (ArrayList<PublicItinerary>) myDriveItineraries.clone();
+
+        useMyDriveData = true;
+
         selectedItineraryIndex = -1;
         isWaypointsNeedUpdate = true;
     }
@@ -208,9 +216,14 @@ public class TripData {
     public void setSelectedItineraryIndex(Integer selectedItineraryIndex) {
         if (selectedItineraryIndex >= 0 && selectedItineraryIndex < myDriveItineraries.size()) {
             this.selectedItineraryIndex = selectedItineraryIndex;
+            useMyDriveData = true;
         }
         else {
             Log.e(TAG, "Invalid mydrive select index is set.");
         }
+    }
+
+    public boolean isUseMyDriveData() {
+        return useMyDriveData;
     }
 }

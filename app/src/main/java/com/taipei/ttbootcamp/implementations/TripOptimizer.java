@@ -135,7 +135,7 @@ public class TripOptimizer implements ITripOptimizer {
         // Update FuzzySearchResults with new search point
         ArrayList<FuzzySearchResult> searchResults = tripData.getFuzzySearchResults();
 
-        if (searchResults != null) {
+        if (!tripData.isUseMyDriveData() && searchResults != null) {
             Log.e(TAG, "create route query searchResults: " + searchResults);
             Log.e(TAG, "create route query searchResults: " + searchResults.size());
 //            final int targetIndex = searchResults.size() / 2;
@@ -148,7 +148,7 @@ public class TripOptimizer implements ITripOptimizer {
             }
             tripData.setEndPoint(new LatLng(searchResults.get(searchResults.size() - 1).getPosition().toLocation()));
         }
-        else if (tripData.getMyDriveItineraries() != null) {
+        else if (tripData.isUseMyDriveData() && tripData.getMyDriveItineraries() != null) {
             if (tripData.isWaypointsNeedUpdate()) {
                 tripData.updateWaypointFromSearchResults();
             }
