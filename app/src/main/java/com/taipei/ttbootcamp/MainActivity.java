@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
     private Button mTestButton;
 
     private TextView mCurrentPosition;
+    private AlertDialog mAlertDialog;
 
     private BootcampBroadcastReceiver mBootcampBroadcastReceiver = new BootcampBroadcastReceiver();
 
@@ -235,11 +236,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
             buttonList.get(0).setOnClickListener((View v) -> {
                 mPopupWindow.dismiss();
+                mTripController.hadDoneOptimize = false;
                 mTripController.PlanTrip(mTripData, POIGenerator.POITYPE.MUSEUM, 100000);
             });
 
             buttonList.get(4).setOnClickListener((View v) -> {
                 mPopupWindow.dismiss();
+                mTripController.hadDoneOptimize = false;
                 setMyDriveSelectionDialog();
             });
 
@@ -462,7 +465,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
 
             });
             AlertDialog.Builder builder = new AlertDialog.Builder(mContext, R.style.AlertDialogCustom);
-            AlertDialog mAlertDialog = builder.create();
+            //AlertDialog mAlertDialog = builder.create();
+            mAlertDialog = builder.create();
             mAlertDialog.show();
             mAlertDialog.getWindow().setContentView(view);
             mAlertDialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog);
@@ -487,6 +491,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityView 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         optimizeResult.optimizeWithRestaurant(mTripData, true, idx);
+                        mAlertDialog.dismiss();
                     }
                 });
 

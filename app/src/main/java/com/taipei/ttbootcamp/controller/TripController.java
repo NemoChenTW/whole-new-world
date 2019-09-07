@@ -55,6 +55,7 @@ public class TripController implements IPOISearchResult, IPlanResultListener, IM
     private RoutePlanner mRoutePlanner;
     private ITripOptimizer mTripOptimizer;
     private IInteractionDialog mInteractionDialog;
+    public boolean hadDoneOptimize;
 
     public TripController(RoutingApi routingApi, SearchApi searchApi, IGoogleApiService googleApiService, PlacesClient googlePlaceClient, IMapElementDisplay mapElementDisplay, ITripOptimizer tripOptimizer, IInteractionDialog interactionDialog) {
         mRoutingApi = routingApi;
@@ -66,6 +67,7 @@ public class TripController implements IPOISearchResult, IPlanResultListener, IM
         mMapElementDisplay.addPositionUpdateListener(this);
         mTripOptimizer = tripOptimizer;
         mInteractionDialog = interactionDialog;
+        hadDoneOptimize = false;
     }
 
     @Override
@@ -269,8 +271,8 @@ public class TripController implements IPOISearchResult, IPlanResultListener, IM
             mMapElementDisplay.displayRoutes(routeResult.getRoutes(), tripData);
         }
 
-        mInteractionDialog.setResultDialog(tripData, needOptimize, restaurantIdx);
-
+        mInteractionDialog.setResultDialog(tripData, !hadDoneOptimize && needOptimize, restaurantIdx);
+        hadDoneOptimize = true;
     }
 
     @Override

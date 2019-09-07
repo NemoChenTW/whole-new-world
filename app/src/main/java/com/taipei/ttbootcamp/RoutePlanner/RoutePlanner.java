@@ -46,6 +46,7 @@ public class RoutePlanner {
                     .subscribe(new DisposableSingleObserver<RouteResponse>() {
                         @Override
                         public void onSuccess(RouteResponse routeResult) {
+                            Log.e(TAG, "plan route success");
                             mPlanResultListener.onRoutePlanComplete(routeResult, tripData, needOptimize);
                         }
 
@@ -53,6 +54,7 @@ public class RoutePlanner {
                         public void onError(Throwable e) {
                             //handleApiError(e);
                             //clearMap();
+                            Log.e(TAG, "plan route error");
                         }
                     });
         }

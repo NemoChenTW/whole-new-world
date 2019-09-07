@@ -54,6 +54,10 @@ public class TripData {
         wayPoints.add(locationPoint);
     }
 
+    public void addWaypoints(int index, final LocationPoint locationPoint) {
+        wayPoints.add(index, locationPoint);
+    }
+
     public void removeWaypoints() {
         wayPoints.clear();
     }

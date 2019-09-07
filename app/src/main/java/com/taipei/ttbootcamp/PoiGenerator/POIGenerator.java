@@ -80,6 +80,7 @@ public class POIGenerator {
                             Log.d(TAG, "fuzzySearchResult: " + fuzzySearchResult.toString());
                         }
                         tripData.setFuzzySearchResults(Utils.toFuzzySearchResultArraylist(fuzzySearchResponse.getResults()));
+                        tripData.setTripTitle(POIGenerator.convertPOITypeToText(poitype) + " tour");
                         searchResultCallback.onPOISearchResult(tripData);
                     }
 

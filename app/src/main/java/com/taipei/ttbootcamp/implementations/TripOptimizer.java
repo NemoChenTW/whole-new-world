@@ -2,6 +2,7 @@ package com.taipei.ttbootcamp.implementations;
 
 import android.util.Log;
 
+import com.taipei.ttbootcamp.data.LocationPoint;
 import com.taipei.ttbootcamp.data.TripData;
 import com.taipei.ttbootcamp.interfaces.IOptimizeResultListener;
 import com.taipei.ttbootcamp.interfaces.ITripOptimizer;
@@ -79,6 +80,7 @@ public class TripOptimizer implements ITripOptimizer {
                     public void onError(Throwable e) {
                         //handleApiError(e);
                         //clearMap();
+                        Log.e(TAG, "Optimize restaurant error.");
                     }
                 });
     }
@@ -129,19 +131,36 @@ public class TripOptimizer implements ITripOptimizer {
 
     private RouteQuery createRouteQuery(@NotNull TripData tripData, @NotNull FuzzySearchResponse fuzzySearchResponse) {
         FuzzySearchResult newPosition = fuzzySearchResponse.getResults().get(0);
-
+        Log.e(TAG, "create route query " + newPosition.getPoi().getName());
         // Update FuzzySearchResults with new search point
         ArrayList<FuzzySearchResult> searchResults = tripData.getFuzzySearchResults();
-        final int targetIndex = searchResults.size() / 2;
-        searchResults.add(targetIndex + 1, newPosition);
 
-        tripData.setFuzzySearchResults(searchResults);
+        if (searchResults != null) {
+            Log.e(TAG, "create route query searchResults: " + searchResults);
+            Log.e(TAG, "create route query searchResults: " + searchResults.size());
+            final int targetIndex = searchResults.size() / 2;
+            searchResults.add(targetIndex + 1, newPosition);
 
-        if (tripData.isWaypointsNeedUpdate()) {
-            tripData.updateWaypointFromSearchResults();
+            tripData.setFuzzySearchResults(searchResults);
+
+            if (tripData.isWaypointsNeedUpdate()) {
+                tripData.updateWaypointFromSearchResults();
+            }
+            tripData.setEndPoint(new LatLng(searchResults.get(searchResults.size() - 1).getPosition().toLocation()));
         }
-        tripData.setEndPoint(new LatLng(searchResults.get(searchResults.size() - 1).getPosition().toLocation()));
+        else if (tripData.getMyDriveItineraries() != null) {
+            if (tripData.isWaypointsNeedUpdate()) {
+                tripData.updateWaypointFromSearchResults();
+            }
 
+            final int targetIndex = tripData.getWayPoints().size() / 2;
+            tripData.addWaypoints(targetIndex + 1, new LocationPoint(newPosition.getPosition(), newPosition.getPoi().getName()));
+            //tripData.setEndPoint(new LatLng(tripData.getWayPoints().get(tripData.getWayPoints().size() - 1).getPosition()));
+
+            for (LocationPoint lp : tripData.getWayPoints()) {
+                Log.e(TAG, "waypoint: " + lp.getName());
+            }
+        }
         return new RouteQueryBuilder(tripData.getStartPoint(), tripData.getEndPoint())
                                                 .withRouteType(RouteType.FASTEST)
                                                 .withInstructionsType(InstructionsType.TAGGED)
